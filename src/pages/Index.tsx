@@ -8,10 +8,11 @@ const Index = () => {
   const { isLoggedIn } = useAuth();
 
   useEffect(() => {
+    // If logged in, navigate to dashboard, otherwise to login
     if (isLoggedIn) {
-      navigate("/");
+      navigate("/dashboard", { replace: true });
     } else {
-      navigate("/login");
+      navigate("/login", { replace: true });
     }
   }, [isLoggedIn, navigate]);
 

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -9,25 +8,22 @@ import { Label } from "@/components/ui/label";
 import { ShoppingCart, UserCircle, UserCog } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Mock login function that would be replaced with real authentication
   const handleLogin = (role: string) => {
     setIsLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       if (username && password) {
-        // Store user role in localStorage
-        localStorage.setItem("userRole", role);
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("username", username);
+        login(role, username);
         
         toast({
           title: "Login Successful",
