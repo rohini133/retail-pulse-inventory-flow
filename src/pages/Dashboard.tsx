@@ -7,10 +7,15 @@ import { DashboardStats } from "@/data/models";
 import { sampleDashboardStats } from "@/data/sampleData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { AlertCircle, DollarSign, Package, ShoppingBag, TrendingUp } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const { userRole } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate API fetch
@@ -88,8 +93,63 @@ const Dashboard = () => {
   return (
     <PageContainer 
       title="Dashboard" 
-      subtitle="Overview of store performance and inventory status"
+      subtitle={userRole === "admin" 
+        ? "Overview of store performance and inventory status" 
+        : "Overview of sales performance and pending orders"}
     >
+      {/* Quick Action Buttons */}
+      <div className="mb-6 grid grid-cols-2 md:grid-cols-4 gap-4 fade-in">
+        {userRole === "admin" ? (
+          <>
+            <Button 
+              onClick={() => navigate("/inventory")} 
+              className="bg-blue-600 hover:bg-blue-700 h-auto py-3"
+            >
+              <Package className="mr-2 h-5 w-5" />
+              Manage Inventory
+            </Button>
+            <Button 
+              onClick={() => navigate("/products")} 
+              className="bg-indigo-600 hover:bg-indigo-700 h-auto py-3"
+            >
+              <ShoppingBag className="mr-2 h-5 w-5" />
+              Product Catalog
+            </Button>
+            <Button 
+              onClick={() => navigate("/billing")} 
+              className="bg-emerald-600 hover:bg-emerald-700 h-auto py-3"
+            >
+              <DollarSign className="mr-2 h-5 w-5" />
+              Sales Dashboard
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-gray-300 hover:bg-gray-50 h-auto py-3"
+            >
+              <TrendingUp className="mr-2 h-5 w-5 text-gray-700" />
+              View Reports
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button 
+              onClick={() => navigate("/billing")} 
+              className="bg-emerald-600 hover:bg-emerald-700 h-auto py-3"
+            >
+              <DollarSign className="mr-2 h-5 w-5" />
+              New Sale
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-gray-300 hover:bg-gray-50 h-auto py-3"
+            >
+              <Package className="mr-2 h-5 w-5 text-gray-700" />
+              View Stock
+            </Button>
+          </>
+        )}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 fade-in">
         <StatsCard
           title="Total Sales"
@@ -190,6 +250,43 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+      
+      {userRole === "admin" && (
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">
+                Admin Tools
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button variant="outline" className="h-auto py-4 justify-start border-gray-200">
+                  <Package className="mr-2 h-5 w-5 text-blue-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Inventory Management</p>
+                    <p className="text-xs text-gray-500">Add, update or remove items</p>
+                  </div>
+                </Button>
+                <Button variant="outline" className="h-auto py-4 justify-start border-gray-200">
+                  <DollarSign className="mr-2 h-5 w-5 text-green-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Pricing & Discounts</p>
+                    <p className="text-xs text-gray-500">Manage product pricing</p>
+                  </div>
+                </Button>
+                <Button variant="outline" className="h-auto py-4 justify-start border-gray-200">
+                  <TrendingUp className="mr-2 h-5 w-5 text-purple-600" />
+                  <div className="text-left">
+                    <p className="font-medium">Sales Reports</p>
+                    <p className="text-xs text-gray-500">View detailed analytics</p>
+                  </div>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </PageContainer>
   );
 };

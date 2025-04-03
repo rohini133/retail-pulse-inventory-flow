@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,6 +17,7 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { userRole } = useAuth();
 
   useEffect(() => {
     fetchProducts();
@@ -65,9 +67,14 @@ const Products = () => {
   };
 
   return (
-    <PageContainer title="Products" subtitle="Browse all available products">
+    <PageContainer 
+      title="Products" 
+      subtitle={userRole === "admin" 
+        ? "Manage your product catalog and inventory" 
+        : "Browse all available products"}
+    >
       <div className="mb-6">
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -80,7 +87,14 @@ const Products = () => {
               />
             </div>
           </div>
-          <Button onClick={handleSearch}>Search</Button>
+          <div className="flex gap-2">
+            <Button onClick={handleSearch}>Search</Button>
+            {userRole === "admin" && (
+              <Button className="bg-green-600 hover:bg-green-700">
+                <Plus className="h-4 w-4 mr-1" /> Add Product
+              </Button>
+            )}
+          </div>
         </div>
 
         {isLoading ? (
@@ -112,7 +126,7 @@ const Products = () => {
               return (
                 <Card 
                   key={product.id} 
-                  className={`overflow-hidden transition-opacity ${
+                  className={`overflow-hidden transition-all hover:shadow-md product-card ${
                     isOutOfStock ? "opacity-70" : ""
                   }`}
                 >
@@ -181,6 +195,13 @@ const Products = () => {
                         Item #{product.itemNumber}
                       </Badge>
                     </div>
+                    
+                    {userRole === "admin" && (
+                      <div className="mt-4 flex justify-end gap-2">
+                        <Button size="sm" variant="outline">Edit</Button>
+                        <Button size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600">Delete</Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
