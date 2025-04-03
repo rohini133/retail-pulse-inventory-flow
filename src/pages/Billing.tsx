@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProductSearchItem } from "@/components/billing/ProductSearchItem";
@@ -24,7 +23,7 @@ import { getProducts } from "@/services/productService";
 import { createBill, sendBillToWhatsApp } from "@/services/billService";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Search, SendHorizonal, ShoppingCart, WhatsappIcon } from "lucide-react";
+import { Loader2, Search, SendHorizonal, ShoppingCart, MessageSquare } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -78,17 +77,14 @@ const Billing = () => {
   };
 
   const handleAddToCart = (product: Product) => {
-    // Check if product is already in cart
     const existingItemIndex = cartItems.findIndex(
       (item) => item.product.id === product.id
     );
 
     if (existingItemIndex >= 0) {
-      // Increment quantity if already in cart
       const newCartItems = [...cartItems];
       const currentQuantity = newCartItems[existingItemIndex].quantity;
       
-      // Check if we can add more based on stock
       if (currentQuantity < product.stock) {
         newCartItems[existingItemIndex] = {
           ...newCartItems[existingItemIndex],
@@ -108,7 +104,6 @@ const Billing = () => {
         });
       }
     } else {
-      // Add new item to cart
       setCartItems([...cartItems, { product, quantity: 1 }]);
       
       toast({
@@ -120,7 +115,6 @@ const Billing = () => {
 
   const handleUpdateQuantity = (item: CartItem, newQuantity: number) => {
     if (newQuantity <= 0) {
-      // Remove item if quantity is 0 or less
       handleRemoveItem(item);
       return;
     }
@@ -197,7 +191,6 @@ const Billing = () => {
       setCreatedBillId(bill.id);
       setIsCheckoutDialogOpen(true);
       
-      // Clear cart after successful checkout
       setCartItems([]);
       setCustomerName("");
       setCustomerPhone("");
@@ -220,7 +213,6 @@ const Billing = () => {
     
     setIsSendingWhatsApp(true);
     try {
-      // In a real app, we'd retrieve the bill by ID and send it
       const bills = await sendBillToWhatsApp({
         id: createdBillId,
         items: cartItems,
@@ -464,7 +456,7 @@ const Billing = () => {
                 {isSendingWhatsApp ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <WhatsappIcon className="h-4 w-4 mr-2" />
+                  <MessageSquare className="h-4 w-4 mr-2" />
                 )}
                 Send Receipt via WhatsApp
               </Button>
