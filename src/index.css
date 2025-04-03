@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 199 89% 48%;
+    --primary: 30 100% 50%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 199 69% 24%;
+    --secondary: 218 79% 35%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
@@ -46,7 +46,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 30 100% 50%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -169,4 +169,110 @@
 .role-badge-cashier {
   background-color: rgba(16, 185, 129, 0.1);
   color: rgba(16, 185, 129, 1);
+}
+
+/* E-commerce specific styles */
+.e-commerce-gradient {
+  background: linear-gradient(135deg, #ff9900 0%, #f53d2d 100%);
+}
+
+.marketplace-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.marketplace-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.promo-banner {
+  background: linear-gradient(to right, #2874f0, #5d8bf4);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.deal-tag {
+  background-color: #f53d2d;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.amazon-button {
+  background-color: #ff9900;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.amazon-button:hover {
+  background-color: #e88a00;
+}
+
+.flipkart-button {
+  background-color: #2874f0;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+}
+
+.flipkart-button:hover {
+  background-color: #1c60d6;
+}
+
+/* Login page specific styles */
+.login-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.login-sidebar {
+  background: linear-gradient(135deg, #2874f0 0%, #5d8bf4 100%);
+  color: white;
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.login-form {
+  background-color: white;
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.animated-input {
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.animated-input:focus {
+  border-color: #2874f0;
+  box-shadow: 0 0 0 3px rgba(40, 116, 240, 0.2);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -80vw 0;
+  }
+  100% {
+    background-position: 80vw 0;
+  }
+}
+
+.shine-effect {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 80vw 100%;
+  animation: shimmer 2s infinite linear;
 }

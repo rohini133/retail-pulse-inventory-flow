@@ -17,16 +17,20 @@ export const PageContainer: React.FC<PageContainerProps> = ({
   const { isLoggedIn, userRole } = useAuth();
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-gray-100">
       <Header />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {isLoggedIn && (title || subtitle) && (
-          <div className="mb-6 bg-white p-6 rounded-lg shadow-sm border border-gray-100 fade-in">
+          <div className="mb-6 bg-white p-6 rounded-lg shadow-md border border-gray-100 fade-in">
             {title && (
               <h1 className="text-2xl font-bold text-gray-900 flex items-center">
                 {title}
                 {userRole && (
-                  <span className="ml-3 text-xs font-medium bg-blue-100 text-blue-800 py-1 px-2 rounded-full">
+                  <span className={`ml-3 text-xs font-medium py-1 px-2 rounded-full ${
+                    userRole === "admin" 
+                      ? "bg-orange-100 text-orange-800" 
+                      : "bg-blue-100 text-blue-800"
+                  }`}>
                     {userRole === "admin" ? "Admin View" : "Cashier View"}
                   </span>
                 )}
