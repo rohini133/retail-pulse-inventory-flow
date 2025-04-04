@@ -14,10 +14,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 30 100% 50%;
+    --primary: 4 90% 48%; /* D-Mart Red */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 218 79% 35%;
+    --secondary: 210 79% 46%; /* D-Mart Blue */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 210 40% 96.1%;
@@ -46,10 +46,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 30 100% 50%;
+    --primary: 4 90% 48%; /* D-Mart Red */
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 210 79% 46%; /* D-Mart Blue */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -171,24 +171,28 @@
   color: rgba(16, 185, 129, 1);
 }
 
-/* E-commerce specific styles */
-.e-commerce-gradient {
-  background: linear-gradient(135deg, #ff9900 0%, #f53d2d 100%);
+/* D-Mart specific styles */
+.dmart-gradient {
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
 }
 
-.marketplace-card {
+.dmart-blue-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+}
+
+.dmart-card {
   border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
-.marketplace-card:hover {
+.dmart-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
-.promo-banner {
-  background: linear-gradient(to right, #2874f0, #5d8bf4);
+.dmart-sale-banner {
+  background: linear-gradient(to right, #e11b22, #f43f5e);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 0.5rem;
@@ -197,8 +201,8 @@
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.deal-tag {
-  background-color: #f53d2d;
+.dmart-offer-tag {
+  background-color: #e11b22;
   color: white;
   font-weight: bold;
   font-size: 0.75rem;
@@ -209,28 +213,28 @@
   left: 10px;
 }
 
-.amazon-button {
-  background-color: #ff9900;
+.dmart-button {
+  background-color: #e11b22;
   color: white;
   font-weight: 600;
   border-radius: 0.25rem;
   transition: background-color 0.2s;
 }
 
-.amazon-button:hover {
-  background-color: #e88a00;
+.dmart-button:hover {
+  background-color: #c61017;
 }
 
-.flipkart-button {
-  background-color: #2874f0;
+.dmart-blue-button {
+  background-color: #1e40af;
   color: white;
   font-weight: 600;
   border-radius: 0.25rem;
   transition: background-color 0.2s;
 }
 
-.flipkart-button:hover {
-  background-color: #1c60d6;
+.dmart-blue-button:hover {
+  background-color: #1e3a8a;
 }
 
 /* Login page specific styles */
@@ -241,7 +245,7 @@
 }
 
 .login-sidebar {
-  background: linear-gradient(135deg, #2874f0 0%, #5d8bf4 100%);
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
   color: white;
   border-top-left-radius: 12px;
   border-bottom-left-radius: 12px;
@@ -258,8 +262,8 @@
 }
 
 .animated-input:focus {
-  border-color: #2874f0;
-  box-shadow: 0 0 0 3px rgba(40, 116, 240, 0.2);
+  border-color: #e11b22;
+  box-shadow: 0 0 0 3px rgba(225, 27, 34, 0.2);
 }
 
 @keyframes shimmer {
@@ -275,4 +279,42 @@
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
   background-size: 80vw 100%;
   animation: shimmer 2s infinite linear;
+}
+
+/* E-commerce specific styles */
+.e-commerce-gradient {
+  background: linear-gradient(135deg, #e11b22 0%, #c61017 100%);
+}
+
+.marketplace-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.marketplace-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.promo-banner {
+  background: linear-gradient(to right, #e11b22, #f43f5e);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.deal-tag {
+  background-color: #e11b22;
+  color: white;
+  font-weight: bold;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }
