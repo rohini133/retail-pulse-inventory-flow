@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProductSearchItem } from "@/components/billing/ProductSearchItem";
 import { CartItemRow } from "@/components/billing/CartItemRow";
@@ -19,11 +20,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CartItem, Product } from "@/data/models";
-import { getProducts } from "@/services/productService";
+import { getProducts, getProduct } from "@/services/productService";
 import { createBill, sendBillToWhatsApp } from "@/services/billService";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Search, SendHorizonal, ShoppingCart, MessageSquare } from "lucide-react";
+import { 
+  Loader2, 
+  Search, 
+  SendHorizonal, 
+  ShoppingCart, 
+  MessageSquare, 
+  ScanBarcode, 
+  QrCode
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -37,8 +46,10 @@ const Billing = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [itemNumberInput, setItemNumberInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -47,7 +58,15 @@ const Billing = () => {
   const [createdBillId, setCreatedBillId] = useState<string | null>(null);
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
   
+  const itemNumberInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  // Focus the item number input when the component mounts or when in scanning mode
+  useEffect(() => {
+    if (isScanning && itemNumberInputRef.current) {
+      itemNumberInputRef.current.focus();
+    }
+  }, [isScanning]);
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -73,6 +92,50 @@ const Billing = () => {
       });
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleItemNumberSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    
+    if (!itemNumberInput.trim()) return;
+    
+    setIsScanning(true);
+    try {
+      // Get all products to find by item number
+      const allProducts = await getProducts();
+      const foundProduct = allProducts.find(
+        product => product.itemNumber.toLowerCase() === itemNumberInput.trim().toLowerCase()
+      );
+      
+      if (foundProduct) {
+        handleAddToCart(foundProduct);
+        toast({
+          title: "Item scanned",
+          description: `${foundProduct.name} has been added to the cart`,
+        });
+      } else {
+        toast({
+          title: "Product not found",
+          description: `No product found with item number: ${itemNumberInput}`,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Scanning error",
+        description: "Failed to scan product. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setItemNumberInput("");
+      setIsScanning(false);
+      // Re-focus the input for the next scan
+      setTimeout(() => {
+        if (itemNumberInputRef.current) {
+          itemNumberInputRef.current.focus();
+        }
+      }, 100);
     }
   };
 
@@ -260,6 +323,53 @@ const Billing = () => {
     <PageContainer title="Billing" subtitle="Create bills and process sales">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
+          {/* D-Mart style item scanning section */}
+          <Card className="mb-6 border-2 border-primary/20">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent">
+              <CardTitle className="flex items-center">
+                <ScanBarcode className="h-5 w-5 mr-2 text-primary" />
+                Quick Item Entry
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <form onSubmit={handleItemNumberSubmit} className="space-y-4">
+                <div className="flex flex-col gap-3">
+                  <label className="text-sm font-medium text-gray-700">
+                    Scan Barcode or Enter Item Number
+                  </label>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                        <QrCode className="h-4 w-4" />
+                      </span>
+                      <Input
+                        ref={itemNumberInputRef}
+                        placeholder="Scan or type item number..."
+                        value={itemNumberInput}
+                        onChange={(e) => setItemNumberInput(e.target.value)}
+                        className="pl-10"
+                        autoComplete="off"
+                        autoFocus
+                      />
+                    </div>
+                    <Button 
+                      type="submit" 
+                      className="bg-primary hover:bg-primary/90"
+                      disabled={isScanning || !itemNumberInput.trim()}
+                    >
+                      {isScanning ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <ScanBarcode className="h-4 w-4 mr-2" />
+                      )}
+                      Add Item
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Product Search</CardTitle>
@@ -313,11 +423,11 @@ const Billing = () => {
         </div>
 
         <div>
-          <Card>
-            <CardHeader className="pb-3">
+          <Card className="dmart-card">
+            <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 to-transparent">
               <div className="flex items-center justify-between">
                 <CardTitle>Shopping Cart</CardTitle>
-                <ShoppingCart className="h-5 w-5 text-muted-foreground" />
+                <ShoppingCart className="h-5 w-5 text-primary" />
               </div>
             </CardHeader>
             <CardContent>
@@ -326,7 +436,7 @@ const Billing = () => {
                   <ShoppingCart className="h-12 w-12 mx-auto text-gray-300 mb-3" />
                   <p className="text-gray-500">Your cart is empty</p>
                   <p className="text-sm text-gray-400 mt-1">
-                    Search for products and add them to your cart
+                    Scan products or search to add items
                   </p>
                 </div>
               ) : (
@@ -416,7 +526,7 @@ const Billing = () => {
             </CardContent>
             <CardFooter>
               <Button 
-                className="w-full" 
+                className="w-full dmart-button" 
                 onClick={handleCheckout}
                 disabled={isLoading || cartItems.length === 0}
               >
@@ -449,7 +559,7 @@ const Billing = () => {
             <p className="mb-4">What would you like to do next?</p>
             {customerPhone && (
               <Button 
-                className="w-full mb-3"
+                className="w-full mb-3 dmart-button"
                 onClick={handleSendWhatsApp}
                 disabled={isSendingWhatsApp}
               >
