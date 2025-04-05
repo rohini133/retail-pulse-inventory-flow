@@ -102,8 +102,20 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           description: `${values.name} has been updated successfully.`,
         });
       } else {
+        // Fix: Ensure all required fields are explicitly provided
         await addProduct({
-          ...values,
+          name: values.name,
+          brand: values.brand,
+          category: values.category,
+          description: values.description,
+          price: values.price,
+          discountPercentage: values.discountPercentage,
+          stock: values.stock,
+          lowStockThreshold: values.lowStockThreshold,
+          image: values.image,
+          size: values.size,
+          color: values.color,
+          itemNumber: values.itemNumber,
         });
         toast({
           title: "Product added",

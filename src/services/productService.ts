@@ -35,6 +35,7 @@ export const updateProduct = async (updatedProduct: Product): Promise<Product> =
   return products[index];
 };
 
+// Fixed type definition to match Product model requirements
 export const addProduct = async (newProduct: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
   // Simulate API fetch delay
   await new Promise(resolve => setTimeout(resolve, 500));
