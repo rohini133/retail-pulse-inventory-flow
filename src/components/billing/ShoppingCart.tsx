@@ -47,19 +47,22 @@ export const ShoppingCart = ({
   
   const { toast } = useToast();
 
-  const formattedSubtotal = new Intl.NumberFormat("en-US", {
+  const formattedSubtotal = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0
   }).format(subtotal);
   
-  const formattedTax = new Intl.NumberFormat("en-US", {
+  const formattedTax = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0
   }).format(tax);
   
-  const formattedTotal = new Intl.NumberFormat("en-US", {
+  const formattedTotal = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0
   }).format(total);
 
   const handleCheckout = async () => {
@@ -67,6 +70,15 @@ export const ShoppingCart = ({
       toast({
         title: "Empty cart",
         description: "Please add items to the cart before proceeding to checkout.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!customerPhone) {
+      toast({
+        title: "Phone number required",
+        description: "Please enter customer's phone number to continue.",
         variant: "destructive",
       });
       return;
@@ -112,14 +124,14 @@ export const ShoppingCart = ({
   };
 
   return (
-    <Card className="dmart-card">
+    <Card className="dmart-card h-full flex flex-col">
       <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 to-transparent">
         <div className="flex items-center justify-between">
           <CardTitle>Shopping Cart</CardTitle>
           <ShoppingCartIcon className="h-5 w-5 text-primary" />
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-grow overflow-auto">
         {cartItems.length === 0 ? (
           <div className="text-center py-8">
             <ShoppingCartIcon className="h-12 w-12 mx-auto text-gray-300 mb-3" />
@@ -173,12 +185,13 @@ export const ShoppingCart = ({
         </div>
         <div>
           <label className="text-sm font-medium text-gray-700">
-            Phone Number
+            Phone Number <span className="text-red-500">*</span>
           </label>
           <Input
             placeholder="Enter phone number (for WhatsApp receipt)"
             value={customerPhone}
             onChange={(e) => setCustomerPhone(e.target.value)}
+            required
           />
         </div>
         <div>
@@ -205,7 +218,7 @@ export const ShoppingCart = ({
             <SelectTrigger>
               <SelectValue placeholder="Select payment method" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent position="popper" className="bg-white">
               <SelectItem value="cash">Cash</SelectItem>
               <SelectItem value="card">Credit/Debit Card</SelectItem>
               <SelectItem value="digital-wallet">Digital Wallet</SelectItem>
@@ -213,7 +226,7 @@ export const ShoppingCart = ({
           </Select>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-auto">
         <Button 
           className="w-full dmart-button" 
           onClick={handleCheckout}

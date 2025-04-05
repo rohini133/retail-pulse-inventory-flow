@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -96,6 +95,13 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .inventory-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
 }
 
 .product-card {
@@ -317,4 +323,65 @@
   position: absolute;
   top: 10px;
   left: 10px;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 2rem 1rem;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  h1, h2, h3 {
+    word-break: break-word;
+  }
+  
+  .dialog-content {
+    width: 95%;
+    max-width: 95%;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Make dialogs work better on mobile */
+@media (max-width: 640px) {
+  [role="dialog"] {
+    padding: 1rem;
+  }
+  
+  .dialog-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+}
+
+/* Mobile-friendly tabs */
+@media (max-width: 640px) {
+  .tabs-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+  
+  .tabs-trigger {
+    white-space: nowrap;
+  }
+}
+
+/* Responsive form layouts */
+@media (max-width: 768px) {
+  .form-row-2col {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-row-3col {
+    grid-template-columns: 1fr;
+  }
 }

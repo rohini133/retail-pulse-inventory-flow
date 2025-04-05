@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { ProductCard } from "@/components/inventory/ProductCard";
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Loader2, Package, PlusCircle, Search } from "lucide-react";
+import { ProductForm } from "@/components/admin/ProductForm";
 
 const Inventory = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -39,6 +39,7 @@ const Inventory = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -67,14 +68,12 @@ const Inventory = () => {
   const filterProducts = () => {
     let filtered = [...products];
 
-    // Apply category filter
     if (categoryFilter !== "all") {
       filtered = filtered.filter(
         (product) => product.category.toLowerCase() === categoryFilter.toLowerCase()
       );
     }
 
-    // Apply search filter
     if (searchTerm.trim() !== "") {
       const search = searchTerm.toLowerCase();
       filtered = filtered.filter(
@@ -117,7 +116,6 @@ const Inventory = () => {
     if (!deletingProduct) return;
 
     try {
-      // In a real app, we would call an API to delete the product
       setProducts(products.filter((p) => p.id !== deletingProduct.id));
       setIsDeleteDialogOpen(false);
       
@@ -139,6 +137,11 @@ const Inventory = () => {
     return ["all", ...new Set(categories)];
   };
 
+  const handleAddProductSuccess = () => {
+    setIsAddProductDialogOpen(false);
+    fetchProducts();
+  };
+
   return (
     <PageContainer title="Inventory" subtitle="Manage your product inventory">
       <div className="mb-6">
@@ -154,14 +157,14 @@ const Inventory = () => {
               />
             </div>
           </div>
-          <Button>
+          <Button onClick={() => setIsAddProductDialogOpen(true)}>
             <PlusCircle className="h-4 w-4 mr-2" />
             Add New Product
           </Button>
         </div>
 
         <Tabs defaultValue="all" value={categoryFilter} onValueChange={setCategoryFilter}>
-          <TabsList className="mb-4">
+          <TabsList className="mb-4 flex flex-wrap overflow-x-auto">
             {getUniqueCategories().map((category) => (
               <TabsTrigger
                 key={category}
@@ -214,7 +217,7 @@ const Inventory = () => {
 
       {/* Edit Product Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
             <DialogDescription>
@@ -222,82 +225,31 @@ const Inventory = () => {
             </DialogDescription>
           </DialogHeader>
           {editingProduct && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={editingProduct.name}
-                  onChange={(e) =>
-                    setEditingProduct({
-                      ...editingProduct,
-                      name: e.target.value,
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="price" className="text-right">
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  value={editingProduct.price}
-                  onChange={(e) =>
-                    setEditingProduct({
-                      ...editingProduct,
-                      price: parseFloat(e.target.value),
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="discount" className="text-right">
-                  Discount %
-                </Label>
-                <Input
-                  id="discount"
-                  type="number"
-                  value={editingProduct.discountPercentage}
-                  onChange={(e) =>
-                    setEditingProduct({
-                      ...editingProduct,
-                      discountPercentage: parseFloat(e.target.value),
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="stock" className="text-right">
-                  Stock
-                </Label>
-                <Input
-                  id="stock"
-                  type="number"
-                  value={editingProduct.stock}
-                  onChange={(e) =>
-                    setEditingProduct({
-                      ...editingProduct,
-                      stock: parseInt(e.target.value),
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-            </div>
+            <ProductForm
+              product={editingProduct}
+              onSuccess={() => {
+                setIsEditDialogOpen(false);
+                fetchProducts();
+              }}
+              onCancel={() => setIsEditDialogOpen(false)}
+            />
           )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleUpdateProduct}>Save Changes</Button>
-          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Product Dialog */}
+      <Dialog open={isAddProductDialogOpen} onOpenChange={setIsAddProductDialogOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+            <DialogDescription>
+              Enter the details for your new product below.
+            </DialogDescription>
+          </DialogHeader>
+          <ProductForm
+            onSuccess={handleAddProductSuccess}
+            onCancel={() => setIsAddProductDialogOpen(false)}
+          />
         </DialogContent>
       </Dialog>
 

@@ -6,7 +6,7 @@ import { ProductForm } from "@/components/admin/ProductForm";
 import { SalesReport } from "@/components/admin/SalesReport";
 import { DiscountManager } from "@/components/admin/DiscountManager";
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Card, 
@@ -34,12 +34,17 @@ import {
 
 export function AdminPanel() {
   const { userRole, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   
   // Redirect non-admin users
   if (!isLoggedIn || userRole !== "admin") {
     return <Navigate to="/login" />;
   }
+
+  const handleAddProductSuccess = () => {
+    setIsAddProductDialogOpen(false);
+  };
 
   return (
     <PageContainer 
@@ -92,6 +97,14 @@ export function AdminPanel() {
             <p className="text-muted-foreground text-sm">
               Monitor stock levels, get low stock alerts, and manage reorders.
             </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="mt-2 w-full"
+              onClick={() => navigate('/inventory')}
+            >
+              View Inventory
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -105,7 +118,7 @@ export function AdminPanel() {
       </div>
 
       <Tabs defaultValue="products" className="space-y-4">
-        <TabsList className="grid grid-cols-3 w-full max-w-md mb-2">
+        <TabsList className="grid sm:grid-cols-3 grid-cols-1 w-full max-w-md mb-2">
           <TabsTrigger value="products" className="flex items-center">
             <ClipboardList className="mr-2 h-4 w-4" />
             Inventory
@@ -134,8 +147,8 @@ export function AdminPanel() {
             <CardContent>
               <p className="mb-4">
                 For detailed product management, visit the 
-                <Button variant="link" className="px-1.5 py-0" asChild>
-                  <a href="/inventory">Inventory Page</a>
+                <Button variant="link" className="px-1.5 py-0" onClick={() => navigate('/inventory')}>
+                  Inventory Page
                 </Button>
                 which provides a complete interface for product management.
               </p>
@@ -158,7 +171,7 @@ export function AdminPanel() {
       </Tabs>
       
       <Dialog open={isAddProductDialogOpen} onOpenChange={setIsAddProductDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
             <DialogDescription>
@@ -166,7 +179,7 @@ export function AdminPanel() {
             </DialogDescription>
           </DialogHeader>
           <ProductForm 
-            onSuccess={() => setIsAddProductDialogOpen(false)}
+            onSuccess={handleAddProductSuccess}
             onCancel={() => setIsAddProductDialogOpen(false)}
           />
         </DialogContent>
