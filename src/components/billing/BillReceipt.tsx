@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Bill } from "@/data/models";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Printer, Send, FileText, WhatsApp } from "lucide-react";
+import { Printer, Send, FileText, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
 
@@ -212,7 +212,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
               {isSendingWhatsApp ? (
                 <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
               ) : (
-                <WhatsApp className="mr-2 h-4 w-4" />
+                <MessageSquare className="mr-2 h-4 w-4" />
               )}
               Send via WhatsApp
             </Button>
