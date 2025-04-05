@@ -18,6 +18,18 @@ export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { isLoggedIn, userRole, userName, logout } = useAuth();
 
+  // Helper function to check if a navigation item should be shown
+  const shouldShowNavItem = (item: string): boolean => {
+    if (userRole === "admin") return true;
+    
+    // Cashiers can only access dashboard and billing
+    if (userRole === "cashier") {
+      return item === "dashboard" || item === "billing";
+    }
+    
+    return true;
+  };
+
   return (
     <header className="bg-white shadow-sm border-b sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -31,30 +43,38 @@ export const Header = () => {
             </div>
             {isLoggedIn && (
               <nav className="hidden md:ml-6 md:flex md:space-x-8">
-                <Link
-                  to="/"
-                  className="inline-flex items-center px-1 pt-1 border-b-2 border-primary text-sm font-medium text-gray-900"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/billing"
-                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                >
-                  Billing
-                </Link>
-                <Link
-                  to="/inventory"
-                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                >
-                  Inventory
-                </Link>
-                <Link
-                  to="/products"
-                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                >
-                  Products
-                </Link>
+                {shouldShowNavItem("dashboard") && (
+                  <Link
+                    to="/"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-primary text-sm font-medium text-gray-900"
+                  >
+                    Dashboard
+                  </Link>
+                )}
+                {shouldShowNavItem("billing") && (
+                  <Link
+                    to="/billing"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  >
+                    Billing
+                  </Link>
+                )}
+                {shouldShowNavItem("inventory") && (
+                  <Link
+                    to="/inventory"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  >
+                    Inventory
+                  </Link>
+                )}
+                {shouldShowNavItem("products") && (
+                  <Link
+                    to="/products"
+                    className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  >
+                    Products
+                  </Link>
+                )}
               </nav>
             )}
           </div>
@@ -122,30 +142,38 @@ export const Header = () => {
         <div className="md:hidden">
           {isLoggedIn && (
             <div className="pt-2 pb-3 space-y-1">
-              <Link
-                to="/"
-                className="block pl-3 pr-4 py-2 border-l-4 border-primary text-base font-medium text-primary bg-primary-50"
-              >
-                Dashboard
-              </Link>
-              <Link
-                to="/billing"
-                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-              >
-                Billing
-              </Link>
-              <Link
-                to="/inventory"
-                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-              >
-                Inventory
-              </Link>
-              <Link
-                to="/products"
-                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
-              >
-                Products
-              </Link>
+              {shouldShowNavItem("dashboard") && (
+                <Link
+                  to="/"
+                  className="block pl-3 pr-4 py-2 border-l-4 border-primary text-base font-medium text-primary bg-primary-50"
+                >
+                  Dashboard
+                </Link>
+              )}
+              {shouldShowNavItem("billing") && (
+                <Link
+                  to="/billing"
+                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
+                >
+                  Billing
+                </Link>
+              )}
+              {shouldShowNavItem("inventory") && (
+                <Link
+                  to="/inventory"
+                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
+                >
+                  Inventory
+                </Link>
+              )}
+              {shouldShowNavItem("products") && (
+                <Link
+                  to="/products"
+                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
+                >
+                  Products
+                </Link>
+              )}
             </div>
           )}
           

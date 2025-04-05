@@ -60,7 +60,7 @@ const App = () => (
             <Route 
               path="/inventory" 
               element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
                   <Inventory />
                 </ProtectedRoute>
               } 
@@ -69,7 +69,7 @@ const App = () => (
             <Route 
               path="/products" 
               element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
                   <Products />
                 </ProtectedRoute>
               } 
@@ -78,7 +78,7 @@ const App = () => (
             <Route 
               path="/admin" 
               element={
-                <ProtectedRoute requiredRole="admin">
+                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
                   <AdminPanel />
                 </ProtectedRoute>
               } 
