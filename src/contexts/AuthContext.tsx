@@ -56,11 +56,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // If required role is "admin", only admins can access
     if (requiredRole === "admin" && userRole !== "admin") return false;
     
-    // Cashiers should not have access to inventory and product details
+    // Cashiers should not have access to inventory, product details, and admin panel
+    // Also restrict access to dashboard statistics
     if (userRole === "cashier" && (
       requiredRole === "inventory" || 
       requiredRole === "products" || 
-      requiredRole === "admin"
+      requiredRole === "admin" ||
+      requiredRole === "sales_statistics"
     )) {
       return false;
     }

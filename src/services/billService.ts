@@ -44,7 +44,7 @@ export const createBill = async (
     0
   );
   
-  const taxRate = 0.08; // 8% tax
+  const taxRate = 0.18; // GST rate (18%)
   const tax = subtotal * taxRate;
   const total = subtotal + tax;
   
