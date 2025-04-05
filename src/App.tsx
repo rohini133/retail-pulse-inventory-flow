@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
+import BillHistory from "./pages/BillHistory";
 import Inventory from "./pages/Inventory";
 import Products from "./pages/Products";
 import NotFound from "./pages/NotFound";
@@ -42,6 +43,15 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Billing />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/bill-history" 
+              element={
+                <ProtectedRoute>
+                  <BillHistory />
                 </ProtectedRoute>
               } 
             />

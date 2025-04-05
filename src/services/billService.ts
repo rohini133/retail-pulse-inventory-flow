@@ -10,7 +10,10 @@ let bills = [...sampleBills];
 export const getBills = async (): Promise<Bill[]> => {
   // Simulate API fetch delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  return [...bills];
+  // Return bills sorted by date with most recent first
+  return [...bills].sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 };
 
 export const getBill = async (id: string): Promise<Bill | undefined> => {
@@ -107,4 +110,25 @@ export const sendBillToWhatsApp = async (bill: Bill): Promise<boolean> => {
   });
   
   return true;
+};
+
+export const searchBills = async (query: string): Promise<Bill[]> => {
+  // Simulate API fetch delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  if (!query.trim()) {
+    return [...bills].sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+  
+  const lowerCaseQuery = query.toLowerCase();
+  return bills.filter(
+    bill => 
+      bill.id.toLowerCase().includes(lowerCaseQuery) ||
+      (bill.customerName && bill.customerName.toLowerCase().includes(lowerCaseQuery)) ||
+      (bill.customerPhone && bill.customerPhone.toLowerCase().includes(lowerCaseQuery))
+  ).sort((a, b) => 
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 };
