@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DashboardStats } from "@/data/models";
 import { sampleDashboardStats } from "@/data/sampleData";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { AlertCircle, DollarSign, Package, ShoppingBag, TrendingUp } from "lucide-react";
+import { AlertCircle, DollarSign, Package, ShoppingBag, TrendingUp, Settings2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -102,6 +102,13 @@ const Dashboard = () => {
         {userRole === "admin" ? (
           <>
             <Button 
+              onClick={() => navigate("/admin")} 
+              className="bg-purple-600 hover:bg-purple-700 h-auto py-3"
+            >
+              <Settings2 className="mr-2 h-5 w-5" />
+              Admin Panel
+            </Button>
+            <Button 
               onClick={() => navigate("/inventory")} 
               className="bg-blue-600 hover:bg-blue-700 h-auto py-3"
             >
@@ -121,13 +128,6 @@ const Dashboard = () => {
             >
               <DollarSign className="mr-2 h-5 w-5" />
               Sales Dashboard
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-gray-300 hover:bg-gray-50 h-auto py-3"
-            >
-              <TrendingUp className="mr-2 h-5 w-5 text-gray-700" />
-              View Reports
             </Button>
           </>
         ) : (

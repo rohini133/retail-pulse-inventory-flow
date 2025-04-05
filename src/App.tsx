@@ -9,6 +9,7 @@ import Billing from "./pages/Billing";
 import BillHistory from "./pages/BillHistory";
 import Inventory from "./pages/Inventory";
 import Products from "./pages/Products";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -70,6 +71,15 @@ const App = () => (
               element={
                 <ProtectedRoute requiredRole="admin">
                   <Products />
+                </ProtectedRoute>
+              } 
+            />
+            
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminPanel />
                 </ProtectedRoute>
               } 
             />
