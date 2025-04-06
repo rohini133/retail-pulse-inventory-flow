@@ -1,5 +1,5 @@
 
-import { Bill, CartItem } from "@/data/models";
+import { Bill, CartItem, BillWithItems, mapBillToRawBill, mapRawBillToBill } from "@/types/supabase-extensions";
 import { sampleBills } from "@/data/sampleData";
 import { decreaseStock } from "./productService";
 import { toast } from "@/components/ui/use-toast";
@@ -51,7 +51,17 @@ export const createBill = async (
   // Create new bill
   const newBill: Bill = {
     id: `B${String(bills.length + 1).padStart(3, '0')}`,
-    items,
+    items: items.map(item => ({
+      id: `bi${Math.random().toString(36).substring(2, 9)}`,
+      billId: '', // Will be set after bill creation
+      productId: item.product.id,
+      productPrice: item.product.price,
+      discountPercentage: item.product.discountPercentage,
+      quantity: item.quantity,
+      total: item.product.price * (1 - item.product.discountPercentage / 100) * item.quantity,
+      productName: item.product.name,
+      product: item.product
+    })),
     subtotal,
     tax,
     total,
@@ -60,8 +70,16 @@ export const createBill = async (
     customerEmail: customerDetails.email,
     paymentMethod,
     createdAt: new Date().toISOString(),
-    status: "completed"
+    status: "completed",
+    userId: "system" // In a real app, this would be the authenticated user's ID
   };
+  
+  // Update bill items with the bill ID
+  if (newBill.items) {
+    newBill.items.forEach(item => {
+      item.billId = newBill.id;
+    });
+  }
   
   // Update inventory stock
   try {

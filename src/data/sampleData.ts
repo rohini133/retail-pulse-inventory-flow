@@ -1,5 +1,5 @@
 
-import { Bill, DashboardStats, Product } from "./models";
+import { Bill, BillWithItems, Product } from "./models";
 
 export const sampleProducts: Product[] = [
   {
@@ -133,12 +133,32 @@ export const sampleProducts: Product[] = [
   }
 ];
 
-export const sampleBills: Bill[] = [
+export const sampleBills: BillWithItems[] = [
   {
     id: "B001",
     items: [
-      { product: sampleProducts[0], quantity: 2 },
-      { product: sampleProducts[2], quantity: 1 }
+      { 
+        id: "bi1", 
+        billId: "B001", 
+        productId: sampleProducts[0].id, 
+        productPrice: sampleProducts[0].price,
+        discountPercentage: sampleProducts[0].discountPercentage,
+        quantity: 2, 
+        total: sampleProducts[0].price * 2,
+        productName: sampleProducts[0].name,
+        product: sampleProducts[0] 
+      },
+      { 
+        id: "bi2", 
+        billId: "B001", 
+        productId: sampleProducts[2].id, 
+        productPrice: sampleProducts[2].price,
+        discountPercentage: sampleProducts[2].discountPercentage,
+        quantity: 1, 
+        total: sampleProducts[2].price,
+        productName: sampleProducts[2].name,
+        product: sampleProducts[2] 
+      }
     ],
     subtotal: 89.97,
     tax: 7.20,
@@ -147,13 +167,34 @@ export const sampleBills: Bill[] = [
     customerPhone: "+1234567890",
     paymentMethod: "card",
     createdAt: "2023-10-01T14:30:00Z",
-    status: "completed"
+    status: "completed",
+    userId: "system"
   },
   {
     id: "B002",
     items: [
-      { product: sampleProducts[1], quantity: 1 },
-      { product: sampleProducts[4], quantity: 1 }
+      { 
+        id: "bi3", 
+        billId: "B002", 
+        productId: sampleProducts[1].id, 
+        productPrice: sampleProducts[1].price,
+        discountPercentage: sampleProducts[1].discountPercentage,
+        quantity: 1, 
+        total: sampleProducts[1].price * (1 - sampleProducts[1].discountPercentage / 100),
+        productName: sampleProducts[1].name,
+        product: sampleProducts[1] 
+      },
+      { 
+        id: "bi4", 
+        billId: "B002", 
+        productId: sampleProducts[4].id, 
+        productPrice: sampleProducts[4].price,
+        discountPercentage: sampleProducts[4].discountPercentage,
+        quantity: 1, 
+        total: sampleProducts[4].price,
+        productName: sampleProducts[4].name,
+        product: sampleProducts[4] 
+      }
     ],
     subtotal: 87.98,
     tax: 7.04,
@@ -162,13 +203,34 @@ export const sampleBills: Bill[] = [
     customerPhone: "+1987654321",
     paymentMethod: "cash",
     createdAt: "2023-10-02T10:15:00Z",
-    status: "completed"
+    status: "completed",
+    userId: "system"
   },
   {
     id: "B003",
     items: [
-      { product: sampleProducts[3], quantity: 1 },
-      { product: sampleProducts[6], quantity: 1 }
+      { 
+        id: "bi5", 
+        billId: "B003", 
+        productId: sampleProducts[3].id, 
+        productPrice: sampleProducts[3].price,
+        discountPercentage: sampleProducts[3].discountPercentage,
+        quantity: 1, 
+        total: sampleProducts[3].price * (1 - sampleProducts[3].discountPercentage / 100),
+        productName: sampleProducts[3].name,
+        product: sampleProducts[3] 
+      },
+      { 
+        id: "bi6", 
+        billId: "B003", 
+        productId: sampleProducts[6].id, 
+        productPrice: sampleProducts[6].price,
+        discountPercentage: sampleProducts[6].discountPercentage,
+        quantity: 1, 
+        total: sampleProducts[6].price * (1 - sampleProducts[6].discountPercentage / 100),
+        productName: sampleProducts[6].name,
+        product: sampleProducts[6] 
+      }
     ],
     subtotal: 129.98,
     tax: 10.40,
@@ -177,7 +239,8 @@ export const sampleBills: Bill[] = [
     customerPhone: "+1654987320",
     paymentMethod: "digital-wallet",
     createdAt: "2023-10-03T16:45:00Z",
-    status: "completed"
+    status: "completed",
+    userId: "system"
   }
 ];
 

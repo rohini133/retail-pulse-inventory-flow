@@ -5,12 +5,26 @@ import {
   Product, 
   CartItem, 
   Bill, 
-  DashboardStats 
+  DashboardStats,
+  BillWithItems,
+  BillItem,
+  BillItemWithProduct,
+  ProductWithStatus,
+  Profile,
+  CustomerInfo,
+  UserRole
 } from "@/types/supabase-extensions";
 
 export type { 
   Product, 
   CartItem, 
   Bill, 
-  DashboardStats 
+  DashboardStats,
+  BillWithItems,
+  BillItem,
+  BillItemWithProduct,
+  ProductWithStatus,
+  Profile,
+  CustomerInfo,
+  UserRole
 };
