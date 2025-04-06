@@ -49,7 +49,7 @@ export const createBill = async (
   const total = subtotal + tax;
   
   // Create new bill
-  const newBill: Bill = {
+  const newBill: BillWithItems = {
     id: `B${String(bills.length + 1).padStart(3, '0')}`,
     items: items.map(item => ({
       id: `bi${Math.random().toString(36).substring(2, 9)}`,
@@ -106,7 +106,7 @@ export const createBill = async (
   return newBill;
 };
 
-export const sendBillToWhatsApp = async (bill: Bill): Promise<boolean> => {
+export const sendBillToWhatsApp = async (bill: BillWithItems): Promise<boolean> => {
   // This would normally call an API to send the WhatsApp message
   // Here we're just simulating success
   

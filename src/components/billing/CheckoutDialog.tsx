@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
-import { CartItem } from "@/data/models";
+import { CartItem, BillItemWithProduct } from "@/data/models";
 import {
   Dialog,
   DialogContent,
@@ -49,9 +49,22 @@ export const CheckoutDialog = ({
     
     setIsSendingWhatsApp(true);
     try {
+      // Convert CartItem[] to BillItemWithProduct[]
+      const billItems: BillItemWithProduct[] = cartItems.map(item => ({
+        id: `bi-${Math.random().toString(36).substring(2, 9)}`,
+        billId: billId,
+        productId: item.product.id,
+        productPrice: item.product.price,
+        discountPercentage: item.product.discountPercentage,
+        quantity: item.quantity,
+        total: item.product.price * (1 - item.product.discountPercentage / 100) * item.quantity,
+        productName: item.product.name,
+        product: item.product
+      }));
+      
       await sendBillToWhatsApp({
         id: billId,
-        items: cartItems,
+        items: billItems,
         subtotal,
         tax,
         total,
@@ -60,7 +73,8 @@ export const CheckoutDialog = ({
         customerEmail,
         paymentMethod,
         createdAt: new Date().toISOString(),
-        status: "completed"
+        status: "completed",
+        userId: "system"
       });
     } catch (error) {
       toast({
