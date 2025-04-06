@@ -1,5 +1,4 @@
-
-import { Bill, BillWithItems, Product } from "./models";
+import { Bill, BillWithItems, Product, DashboardStats } from "./models";
 
 export const sampleProducts: Product[] = [
   {

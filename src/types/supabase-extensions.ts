@@ -1,4 +1,3 @@
-
 import type { Database } from '@/integrations/supabase/types';
 
 // Re-export the Database type for easier imports throughout the app

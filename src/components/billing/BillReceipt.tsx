@@ -1,6 +1,6 @@
 
 import { useState, useRef } from "react";
-import { Bill } from "@/data/models";
+import { Bill, BillWithItems } from "@/data/models";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Printer, Send, FileText, MessageSquare } from "lucide-react";
@@ -75,7 +75,13 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     
     setIsSendingWhatsApp(true);
     try {
-      await sendBillToWhatsApp(bill);
+      // Convert Bill to BillWithItems to ensure items is defined
+      const billWithItems: BillWithItems = {
+        ...bill,
+        items: bill.items || []
+      };
+      
+      await sendBillToWhatsApp(billWithItems);
       toast({
         title: "Receipt sent",
         description: `Receipt has been sent to ${bill.customerPhone} via WhatsApp.`,
