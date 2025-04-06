@@ -1,5 +1,5 @@
 
-import { Product } from "@/data/models";
+import { Product, ProductWithStatus } from "@/types/supabase-extensions";
 import { sampleProducts } from "@/data/sampleData";
 import { toast } from "@/components/ui/use-toast";
 
@@ -36,7 +36,7 @@ export const updateProduct = async (updatedProduct: Product): Promise<Product> =
 };
 
 // Fixed type definition to match Product model requirements
-export const addProduct = async (newProduct: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
+export const addProduct = async (newProduct: Omit<Product, 'id' | 'created_at' | 'updated_at'>): Promise<Product> => {
   // Simulate API fetch delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -44,8 +44,8 @@ export const addProduct = async (newProduct: Omit<Product, 'id' | 'createdAt' | 
   const product: Product = {
     ...newProduct,
     id: `p${products.length + 1}`,
-    createdAt: now,
-    updatedAt: now
+    created_at: now,
+    updated_at: now
   };
   
   products.push(product);
@@ -73,11 +73,11 @@ export const decreaseStock = async (productId: string, quantity: number = 1): Pr
   products[index] = {
     ...products[index],
     stock: products[index].stock - quantity,
-    updatedAt: new Date().toISOString()
+    updated_at: new Date().toISOString()
   };
   
   // Check if stock is low after update
-  if (products[index].stock <= products[index].lowStockThreshold && products[index].stock > 0) {
+  if (products[index].stock <= products[index].low_stock_threshold && products[index].stock > 0) {
     toast({
       title: "Low Stock Alert",
       description: `${products[index].name} is running low on stock (${products[index].stock} remaining).`,
@@ -101,7 +101,7 @@ export const getProductStockStatus = (product: Product): "in-stock" | "low-stock
   if (product.stock === 0) {
     return "out-of-stock";
   }
-  if (product.stock <= product.lowStockThreshold) {
+  if (product.stock <= product.low_stock_threshold) {
     return "low-stock";
   }
   return "in-stock";

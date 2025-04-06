@@ -9,7 +9,177 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bill_items: {
+        Row: {
+          bill_id: string
+          discount_percentage: number
+          id: string
+          product_id: string
+          product_name: string
+          product_price: number
+          quantity: number
+          total: number
+        }
+        Insert: {
+          bill_id: string
+          discount_percentage: number
+          id?: string
+          product_id: string
+          product_name: string
+          product_price: number
+          quantity: number
+          total: number
+        }
+        Update: {
+          bill_id?: string
+          discount_percentage?: number
+          id?: string
+          product_id?: string
+          product_name?: string
+          product_price?: number
+          quantity?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bill_items_bill_id_fkey"
+            columns: ["bill_id"]
+            isOneToOne: false
+            referencedRelation: "bills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bill_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bills: {
+        Row: {
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          payment_method: string
+          status: string
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          payment_method: string
+          status?: string
+          subtotal: number
+          tax: number
+          total: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          payment_method?: string
+          status?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          brand: string
+          category: string
+          color: string | null
+          created_at: string
+          description: string | null
+          discount_percentage: number
+          id: string
+          image: string | null
+          item_number: string
+          low_stock_threshold: number
+          name: string
+          price: number
+          size: string | null
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          brand: string
+          category: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          image?: string | null
+          item_number: string
+          low_stock_threshold?: number
+          name: string
+          price: number
+          size?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          category?: string
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          discount_percentage?: number
+          id?: string
+          image?: string | null
+          item_number?: string
+          low_stock_threshold?: number
+          name?: string
+          price?: number
+          size?: string | null
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
