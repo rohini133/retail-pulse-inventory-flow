@@ -3,6 +3,7 @@ import { Bill, CartItem, BillWithItems, mapBillToRawBill, mapRawBillToBill } fro
 import { sampleBills } from "@/data/sampleData";
 import { decreaseStock } from "./productService";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 // In a real application, these functions would make API calls to a backend
 let bills = [...sampleBills];
@@ -30,7 +31,7 @@ export const createBill = async (
     email?: string;
   },
   paymentMethod: "cash" | "card" | "digital-wallet"
-): Promise<Bill> => {
+): Promise<BillWithItems> => {
   // Simulate API fetch delay
   await new Promise(resolve => setTimeout(resolve, 700));
   
@@ -107,8 +108,7 @@ export const createBill = async (
 };
 
 export const sendBillToWhatsApp = async (bill: BillWithItems): Promise<boolean> => {
-  // This would normally call an API to send the WhatsApp message
-  // Here we're just simulating success
+  // This function would integrate with WhatsApp Business API in a production environment
   
   if (!bill.customerPhone) {
     toast({
@@ -121,6 +121,9 @@ export const sendBillToWhatsApp = async (bill: BillWithItems): Promise<boolean> 
   
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // In a production environment, you would integrate with WhatsApp Business API here
+  // Example: Call a Supabase Edge Function that connects to WhatsApp API
   
   toast({
     title: "Bill sent successfully",

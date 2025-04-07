@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
-import { CartItem, BillItemWithProduct } from "@/data/models";
+import { CartItem, BillItemWithProduct, BillWithItems } from "@/data/models";
 import {
   Dialog,
   DialogContent,
@@ -62,7 +62,8 @@ export const CheckoutDialog = ({
         product: item.product
       }));
       
-      await sendBillToWhatsApp({
+      // Create a BillWithItems object to pass to sendBillToWhatsApp
+      const billWithItems: BillWithItems = {
         id: billId,
         items: billItems,
         subtotal,
@@ -75,7 +76,9 @@ export const CheckoutDialog = ({
         createdAt: new Date().toISOString(),
         status: "completed",
         userId: "system"
-      });
+      };
+      
+      await sendBillToWhatsApp(billWithItems);
     } catch (error) {
       toast({
         title: "Failed to send WhatsApp",
