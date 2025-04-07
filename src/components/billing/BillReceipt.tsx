@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import { Bill, BillWithItems } from "@/data/models";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Printer, Send, FileText, MessageSquare } from "lucide-react";
+import { Printer, Download, MessageSquare, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
 
@@ -13,18 +13,23 @@ interface BillReceiptProps {
 
 export const BillReceipt = ({ bill }: BillReceiptProps) => {
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const receiptRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'INR',
+      maximumFractionDigits: 0
     }).format(amount);
   };
 
   const handlePrint = () => {
     if (!receiptRef.current) return;
+    
+    setIsPrinting(true);
 
     const printContents = receiptRef.current.innerHTML;
     const originalContents = document.body.innerHTML;
@@ -60,7 +65,13 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     setTimeout(() => {
       window.print();
       document.body.innerHTML = originalContents;
-    }, 100);
+      setIsPrinting(false);
+      
+      toast({
+        title: "Receipt Printed",
+        description: "The receipt has been sent to the printer.",
+      });
+    }, 1000);
   };
 
   const handleSendWhatsApp = async () => {
@@ -95,6 +106,31 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     } finally {
       setIsSendingWhatsApp(false);
     }
+  };
+
+  const handleDownloadPDF = () => {
+    setIsDownloading(true);
+    
+    // Mock PDF download
+    setTimeout(() => {
+      const fileName = `receipt-${bill.id}.pdf`;
+      
+      // Create a mock download effect
+      const element = document.createElement("a");
+      const file = new Blob(["Receipt content would be here in a real implementation"], { type: "application/pdf" });
+      element.href = URL.createObjectURL(file);
+      element.download = fileName;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      setIsDownloading(false);
+      
+      toast({
+        title: "Receipt Downloaded",
+        description: `Receipt has been downloaded as ${fileName}`,
+      });
+    }, 1500);
   };
 
   return (
@@ -203,8 +239,12 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
 
       <CardFooter className="border-t pt-4 mt-auto">
         <div className="flex flex-col w-full gap-2">
-          <Button onClick={handlePrint} className="w-full justify-start">
-            <Printer className="mr-2 h-4 w-4" />
+          <Button onClick={handlePrint} className="w-full justify-start" disabled={isPrinting}>
+            {isPrinting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Printer className="mr-2 h-4 w-4" />
+            )}
             Print Receipt
           </Button>
           
@@ -216,7 +256,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
               className="w-full justify-start"
             >
               {isSendingWhatsApp ? (
-                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
                 <MessageSquare className="mr-2 h-4 w-4" />
               )}
@@ -224,8 +264,17 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
             </Button>
           )}
           
-          <Button variant="outline" className="w-full justify-start">
-            <FileText className="mr-2 h-4 w-4" />
+          <Button 
+            variant="outline" 
+            className="w-full justify-start"
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
             Download PDF
           </Button>
         </div>

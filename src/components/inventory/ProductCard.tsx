@@ -15,9 +15,10 @@ interface ProductCardProps {
 export const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
   const stockStatus = getProductStockStatus(product);
   
-  const formattedPrice = new Intl.NumberFormat("en-US", {
+  const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
-    currency: "USD",
+    currency: "INR",
+    maximumFractionDigits: 0
   }).format(product.price);
   
   const discountedPrice = product.discountPercentage > 0 
@@ -25,9 +26,10 @@ export const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => 
     : null;
     
   const formattedDiscountedPrice = discountedPrice 
-    ? new Intl.NumberFormat("en-US", {
+    ? new Intl.NumberFormat("en-IN", {
         style: "currency",
-        currency: "USD",
+        currency: "INR",
+        maximumFractionDigits: 0
       }).format(discountedPrice)
     : null;
 
