@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2, MessageSquare } from "lucide-react";
+import { Loader2, MessageSquare, Printer, Download } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
 import { CartItem, BillItemWithProduct, BillWithItems } from "@/data/models";
@@ -42,6 +42,8 @@ export const CheckoutDialog = ({
   total
 }: CheckoutDialogProps) => {
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { toast } = useToast();
 
   const handleSendWhatsApp = async () => {
@@ -79,6 +81,11 @@ export const CheckoutDialog = ({
       };
       
       await sendBillToWhatsApp(billWithItems);
+      
+      toast({
+        title: "WhatsApp Receipt Sent",
+        description: `The receipt has been sent to ${customerPhone}`,
+      });
     } catch (error) {
       toast({
         title: "Failed to send WhatsApp",
@@ -88,6 +95,32 @@ export const CheckoutDialog = ({
     } finally {
       setIsSendingWhatsApp(false);
     }
+  };
+
+  const handlePrintReceipt = () => {
+    setIsPrinting(true);
+    
+    // Simulate printing process
+    setTimeout(() => {
+      toast({
+        title: "Receipt Printed",
+        description: "The receipt has been sent to the printer.",
+      });
+      setIsPrinting(false);
+    }, 1500);
+  };
+
+  const handleDownloadReceipt = () => {
+    setIsDownloading(true);
+    
+    // Simulate download process
+    setTimeout(() => {
+      toast({
+        title: "Receipt Downloaded",
+        description: "The receipt has been downloaded successfully.",
+      });
+      setIsDownloading(false);
+    }, 1000);
   };
 
   return (
@@ -101,6 +134,34 @@ export const CheckoutDialog = ({
         </DialogHeader>
         <div className="py-4">
           <p className="mb-4">What would you like to do next?</p>
+          
+          <Button 
+            className="w-full mb-3"
+            onClick={handlePrintReceipt}
+            disabled={isPrinting}
+          >
+            {isPrinting ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Printer className="h-4 w-4 mr-2" />
+            )}
+            Print Receipt
+          </Button>
+          
+          <Button 
+            className="w-full mb-3"
+            variant="secondary"
+            onClick={handleDownloadReceipt}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            Download Receipt
+          </Button>
+          
           {customerPhone && (
             <Button 
               className="w-full mb-3 dmart-button"
@@ -115,6 +176,7 @@ export const CheckoutDialog = ({
               Send Receipt via WhatsApp
             </Button>
           )}
+          
           <Button
             variant="outline"
             className="w-full"
