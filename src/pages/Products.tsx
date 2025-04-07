@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
@@ -107,9 +106,10 @@ const Products = () => {
               const stockStatus = getProductStockStatus(product);
               const isOutOfStock = stockStatus === "out-of-stock";
               
-              const formattedPrice = new Intl.NumberFormat("en-US", {
+              const formattedPrice = new Intl.NumberFormat("en-IN", {
                 style: "currency",
-                currency: "USD",
+                currency: "INR",
+                maximumFractionDigits: 0
               }).format(product.price);
               
               const discountedPrice = product.discountPercentage > 0 
@@ -117,9 +117,10 @@ const Products = () => {
                 : null;
                 
               const formattedDiscountedPrice = discountedPrice 
-                ? new Intl.NumberFormat("en-US", {
+                ? new Intl.NumberFormat("en-IN", {
                     style: "currency",
-                    currency: "USD",
+                    currency: "INR",
+                    maximumFractionDigits: 0
                   }).format(discountedPrice)
                 : null;
 
