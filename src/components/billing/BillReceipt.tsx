@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Bill, BillWithItems } from "@/data/models";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -22,8 +21,9 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
+      maximumFractionDigits: 0,
+      currencyDisplay: 'symbol'
+    }).format(amount).replace('₹', '₹ ');
   };
 
   const handlePrint = () => {
@@ -86,7 +86,6 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     
     setIsSendingWhatsApp(true);
     try {
-      // Convert Bill to BillWithItems to ensure items is defined
       const billWithItems: BillWithItems = {
         ...bill,
         items: bill.items || []
@@ -111,11 +110,9 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
   const handleDownloadPDF = () => {
     setIsDownloading(true);
     
-    // Mock PDF download
     setTimeout(() => {
       const fileName = `receipt-${bill.id}.pdf`;
       
-      // Create a mock download effect
       const element = document.createElement("a");
       const file = new Blob(["Receipt content would be here in a real implementation"], { type: "application/pdf" });
       element.href = URL.createObjectURL(file);

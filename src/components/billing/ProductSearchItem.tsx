@@ -14,8 +14,9 @@ export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemPro
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(product.price);
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(product.price).replace('₹', '₹ '); // Add a space after the symbol
   
   const discountedPrice = product.discountPercentage > 0 
     ? product.price * (1 - product.discountPercentage / 100) 
@@ -25,8 +26,9 @@ export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemPro
     ? new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-        maximumFractionDigits: 0
-      }).format(discountedPrice)
+        maximumFractionDigits: 0,
+        currencyDisplay: 'symbol'
+      }).format(discountedPrice).replace('₹', '₹ ') // Add a space after the symbol
     : null;
 
   return (

@@ -1,4 +1,3 @@
-
 import { CartItem } from "@/data/models";
 import { Button } from "@/components/ui/button";
 import { MinusIcon, PlusIcon, Trash2 } from "lucide-react";
@@ -25,14 +24,16 @@ export const CartItemRow = ({
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(discountedPrice);
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(discountedPrice).replace('₹', '₹ '); // Add a space after the symbol
   
   const formattedTotal = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(itemTotal);
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(itemTotal).replace('₹', '₹ '); // Add a space after the symbol
 
   return (
     <div className="flex items-center justify-between py-3 border-b">

@@ -49,20 +49,23 @@ export const ShoppingCart = ({
   const formattedSubtotal = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(subtotal);
-  
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(subtotal).replace('₹', '₹ ');
+
   const formattedTax = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(tax);
-  
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(tax).replace('₹', '₹ ');
+
   const formattedTotal = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(total);
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(total).replace('₹', '₹ ');
 
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
@@ -102,13 +105,11 @@ export const ShoppingCart = ({
         paymentMethod
       });
       
-      // Clear form fields
       setCustomerName("");
       setCustomerPhone("");
       setCustomerEmail("");
       setPaymentMethod("cash");
       
-      // Clear cart
       onCartClear();
       
     } catch (error) {

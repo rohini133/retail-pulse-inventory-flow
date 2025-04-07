@@ -18,8 +18,9 @@ export const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => 
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
-    maximumFractionDigits: 0
-  }).format(product.price);
+    maximumFractionDigits: 0,
+    currencyDisplay: 'symbol'
+  }).format(product.price).replace('₹', '₹ '); // Add a space after the symbol
   
   const discountedPrice = product.discountPercentage > 0 
     ? product.price * (1 - product.discountPercentage / 100) 
@@ -29,8 +30,9 @@ export const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => 
     ? new Intl.NumberFormat("en-IN", {
         style: "currency",
         currency: "INR",
-        maximumFractionDigits: 0
-      }).format(discountedPrice)
+        maximumFractionDigits: 0,
+        currencyDisplay: 'symbol'
+      }).format(discountedPrice).replace('₹', '₹ ') // Add a space after the symbol
     : null;
 
   return (

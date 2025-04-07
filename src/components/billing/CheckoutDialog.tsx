@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, MessageSquare, Printer, Download } from "lucide-react";
@@ -51,7 +50,6 @@ export const CheckoutDialog = ({
     
     setIsSendingWhatsApp(true);
     try {
-      // Convert CartItem[] to BillItemWithProduct[]
       const billItems: BillItemWithProduct[] = cartItems.map(item => ({
         id: `bi-${Math.random().toString(36).substring(2, 9)}`,
         billId: billId,
@@ -64,7 +62,6 @@ export const CheckoutDialog = ({
         product: item.product
       }));
       
-      // Create a BillWithItems object to pass to sendBillToWhatsApp
       const billWithItems: BillWithItems = {
         id: billId,
         items: billItems,
@@ -100,7 +97,6 @@ export const CheckoutDialog = ({
   const handlePrintReceipt = () => {
     setIsPrinting(true);
     
-    // Simulate printing process
     setTimeout(() => {
       toast({
         title: "Receipt Printed",
@@ -113,7 +109,6 @@ export const CheckoutDialog = ({
   const handleDownloadReceipt = () => {
     setIsDownloading(true);
     
-    // Simulate download process
     setTimeout(() => {
       toast({
         title: "Receipt Downloaded",

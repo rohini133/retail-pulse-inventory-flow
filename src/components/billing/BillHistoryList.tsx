@@ -68,8 +68,9 @@ export const BillHistoryList = ({ onSelectBill, selectedBillId }: BillHistoryLis
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(amount);
+      maximumFractionDigits: 0,
+      currencyDisplay: 'symbol'
+    }).format(amount).replace('₹', '₹ '); // Add a space after the symbol
   };
 
   return (
