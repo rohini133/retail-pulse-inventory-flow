@@ -125,6 +125,7 @@ export const CheckoutDialog = ({
         description: "The receipt has been sent to the printer.",
       });
     } catch (error) {
+      console.error("Print error:", error);
       toast({
         title: "Print Failed",
         description: "There was an error printing the receipt. Please try again.",
@@ -136,7 +137,14 @@ export const CheckoutDialog = ({
   };
 
   const handleDownloadReceipt = () => {
-    if (!billId) return;
+    if (!billId) {
+      toast({
+        title: "Download Failed",
+        description: "Invalid bill information. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsDownloading(true);
     
@@ -165,6 +173,7 @@ export const CheckoutDialog = ({
         description: "The receipt has been downloaded successfully.",
       });
     } catch (error) {
+      console.error("Download error:", error);
       toast({
         title: "Download Failed",
         description: "There was an error generating the receipt. Please try again.",
