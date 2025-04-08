@@ -47,7 +47,7 @@ export const PageContainer: React.FC<PageContainerProps> = ({
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center">
               <div className="text-sm text-gray-500">
-                &copy; 2025 RetailPulse. All rights reserved.
+                &copy; 2025 Demo. All rights reserved.
               </div>
               <div className="text-sm text-gray-400">
                 Version 1.0.0

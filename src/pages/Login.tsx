@@ -53,7 +53,7 @@ const Login = () => {
               <div>
                 <div className="flex items-center mb-6">
                   <ShoppingCart className="h-10 w-10 text-white" />
-                  <h1 className="text-2xl font-bold ml-2">RetailPulse</h1>
+                  <h1 className="text-2xl font-bold ml-2">Demo</h1>
                 </div>
                 <h2 className="text-xl font-bold mb-4">Welcome to the Ultimate Retail Management System</h2>
                 <p className="text-white/80 mb-6">
@@ -96,7 +96,7 @@ const Login = () => {
               <div className="mt-6">
                 <div className="p-3 bg-white/10 rounded-lg">
                   <p className="text-sm text-white/90">
-                    "RetailPulse has transformed how we manage our store inventory and sales. Highly recommended!"
+                    "Demo has transformed how we manage our store inventory and sales. Highly recommended!"
                   </p>
                   <p className="text-xs text-white/70 mt-2">- Sarah Johnson, Fashion Boutique Owner</p>
                 </div>

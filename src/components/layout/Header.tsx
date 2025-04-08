@@ -38,7 +38,7 @@ export const Header = () => {
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
                 <ShoppingCart className="h-8 w-8 text-primary" />
-                <span className="ml-2 text-xl font-bold text-gray-800">RetailPulse</span>
+                <span className="ml-2 text-xl font-bold text-gray-800">Demo</span>
               </Link>
             </div>
             {isLoggedIn && (
