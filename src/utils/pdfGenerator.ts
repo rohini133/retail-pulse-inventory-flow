@@ -3,15 +3,15 @@ import { BillWithItems } from "@/data/models";
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 
-declare module 'jspdf' {
-  interface jsPDF {
-    autoTable: (options: any) => jsPDF;
-  }
+// This is required for TypeScript to recognize the autoTable method
+interface JsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => JsPDFWithAutoTable;
 }
 
 export const generatePDF = (bill: BillWithItems): Blob => {
   try {
-    const doc = new jsPDF();
+    // Create a new document with jsPDF
+    const doc = new jsPDF() as JsPDFWithAutoTable;
     const pageWidth = doc.internal.pageSize.getWidth();
     
     // Add business info
@@ -53,7 +53,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
       "card": "Credit/Debit Card",
       "digital-wallet": "Digital Wallet"
     };
-    doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod]}`, 14, 91);
+    doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod as keyof typeof paymentMethodMap]}`, 14, 91);
     
     // Add items table
     const tableColumn = ["No.", "Item", "Price", "Qty", "Discount", "Total"];
@@ -66,6 +66,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
       `₹ ${(item.productPrice * (1 - item.discountPercentage / 100) * item.quantity).toFixed(2)}`
     ]);
     
+    // Use autoTable plugin
     doc.autoTable({
       startY: 100,
       head: [tableColumn],

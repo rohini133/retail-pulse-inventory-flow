@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Printer, Download, MessageSquare, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { sendBillToWhatsApp } from "@/services/billService";
+import { generatePDF } from "@/utils/pdfGenerator";
 
 interface BillReceiptProps {
   bill: Bill;
@@ -110,24 +111,41 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
   const handleDownloadPDF = () => {
     setIsDownloading(true);
     
-    setTimeout(() => {
-      const fileName = `receipt-${bill.id}.pdf`;
+    try {
+      const billWithItems: BillWithItems = {
+        ...bill,
+        items: bill.items || []
+      };
       
+      const pdfBlob = generatePDF(billWithItems);
+      
+      const url = URL.createObjectURL(pdfBlob);
+      const fileName = `receipt-${bill.id}.pdf`;
       const element = document.createElement("a");
-      const file = new Blob(["Receipt content would be here in a real implementation"], { type: "application/pdf" });
-      element.href = URL.createObjectURL(file);
+      element.href = url;
       element.download = fileName;
       document.body.appendChild(element);
       element.click();
-      document.body.removeChild(element);
       
-      setIsDownloading(false);
+      setTimeout(() => {
+        document.body.removeChild(element);
+        URL.revokeObjectURL(url);
+      }, 100);
       
       toast({
         title: "Receipt Downloaded",
         description: `Receipt has been downloaded as ${fileName}`,
       });
-    }, 1500);
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Receipt Download Failed",
+        description: "There was an error downloading the receipt. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
