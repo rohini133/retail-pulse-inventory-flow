@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { Product } from "@/data/models";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { addProduct, updateProduct } from "@/services/productService";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, Image as ImageIcon } from "lucide-react";
 
 const productSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters"),
@@ -52,6 +52,8 @@ interface ProductFormProps {
 
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const isEditing = !!product;
 
@@ -132,6 +134,44 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image should be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Only image files are allowed",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Convert to base64 for preview and storage
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      setImagePreview(base64);
+      form.setValue('image', base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
   };
 
   return (
@@ -221,7 +261,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel>Price (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" min="0" {...field} />
                 </FormControl>
@@ -311,11 +351,52 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           name="image"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Image URL</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter image URL" {...field} />
-              </FormControl>
-              <FormMessage />
+              <FormLabel>Product Image</FormLabel>
+              <div className="space-y-4">
+                {imagePreview && (
+                  <div className="relative w-full max-w-[200px] h-[150px] border rounded-md overflow-hidden">
+                    <img 
+                      src={imagePreview} 
+                      alt="Product preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex gap-3">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={triggerFileInput}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Image
+                  </Button>
+                  
+                  <Input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                  
+                  <FormControl>
+                    <Input 
+                      placeholder="Or enter image URL" 
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setImagePreview(e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                </div>
+                <FormDescription>
+                  Upload a product image or provide an image URL
+                </FormDescription>
+                <FormMessage />
+              </div>
             </FormItem>
           )}
         />

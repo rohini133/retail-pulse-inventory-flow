@@ -19,28 +19,33 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (role: string) => {
+  const handleLogin = async (role: string) => {
     setIsLoading(true);
     
-    setTimeout(() => {
-      if (username && password) {
-        login(role, username);
-        
-        toast({
-          title: "Login Successful",
-          description: `Welcome back, ${username}!`,
-        });
-        
-        navigate("/");
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Login Failed",
-          description: "Please provide both username and password.",
-        });
-      }
+    if (!username || !password) {
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: "Please provide both username and password.",
+      });
       setIsLoading(false);
-    }, 1000);
+      return;
+    }
+    
+    try {
+      const success = await login(username, password);
+      if (success) {
+        navigate("/");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Login Error",
+        description: "An unexpected error occurred. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -108,7 +113,7 @@ const Login = () => {
               <div className="max-w-md mx-auto">
                 <div className="text-center mb-8">
                   <h2 className="text-2xl font-bold text-gray-900">Sign in to your account</h2>
-                  <p className="text-gray-500 mt-2">Choose your role to continue</p>
+                  <p className="text-gray-500 mt-2">Enter your credentials to continue</p>
                 </div>
 
                 <Tabs defaultValue="admin" className="w-full">
@@ -116,7 +121,7 @@ const Login = () => {
                     <TabsTrigger value="admin" className="rounded-md py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
                       <div className="flex flex-col items-center">
                         <UserCog className="h-5 w-5 mb-1 text-orange-500" />
-                        <span>Admin / Owner</span>
+                        <span>Admin</span>
                       </div>
                     </TabsTrigger>
                     <TabsTrigger value="cashier" className="rounded-md py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm">
@@ -144,7 +149,7 @@ const Login = () => {
                             <Label htmlFor="admin-username">Username</Label>
                             <Input 
                               id="admin-username" 
-                              placeholder="admin" 
+                              placeholder="Enter your username" 
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
                               className="animated-input"
@@ -169,7 +174,6 @@ const Login = () => {
                               <input type="checkbox" id="remember" className="rounded border-gray-300 text-orange-500 mr-2" />
                               <label htmlFor="remember" className="text-gray-600">Remember me</label>
                             </div>
-                            <a href="#" className="text-orange-500 hover:underline">Forgot password?</a>
                           </div>
                         </div>
                       </CardContent>
@@ -179,7 +183,7 @@ const Login = () => {
                           onClick={() => handleLogin("admin")}
                           disabled={isLoading}
                         >
-                          {isLoading ? "Signing in..." : "Sign In as Admin"}
+                          {isLoading ? "Signing in..." : "Sign In"}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -202,7 +206,7 @@ const Login = () => {
                             <Label htmlFor="cashier-username">Username</Label>
                             <Input 
                               id="cashier-username" 
-                              placeholder="cashier" 
+                              placeholder="Enter your username" 
                               value={username}
                               onChange={(e) => setUsername(e.target.value)}
                               className="animated-input"
@@ -227,7 +231,6 @@ const Login = () => {
                               <input type="checkbox" id="remember-cashier" className="rounded border-gray-300 text-blue-600 mr-2" />
                               <label htmlFor="remember-cashier" className="text-gray-600">Remember me</label>
                             </div>
-                            <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
                           </div>
                         </div>
                       </CardContent>
@@ -237,7 +240,7 @@ const Login = () => {
                           onClick={() => handleLogin("cashier")}
                           disabled={isLoading}
                         >
-                          {isLoading ? "Signing in..." : "Sign In as Cashier"}
+                          {isLoading ? "Signing in..." : "Sign In"}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -245,21 +248,18 @@ const Login = () => {
                 </Tabs>
 
                 <div className="mt-8 text-center">
-                  <div className="mb-4 promo-banner shine-effect">
-                    <span className="font-bold">New User? </span> 
-                    Contact your administrator for access
-                  </div>
-                  
                   <div className="text-sm text-gray-500 space-y-1">
-                    <p className="font-medium">Demo credentials:</p>
+                    <p className="font-medium">System Users:</p>
                     <div className="grid grid-cols-2 gap-2 text-xs bg-gray-50 rounded-lg p-3">
                       <div className="text-left">
                         <p className="font-semibold text-orange-600">Admin:</p>
-                        <p>admin / admin123</p>
+                        <p>Username: rohini25</p>
+                        <p>Password: Rohini@123</p>
                       </div>
                       <div className="text-left">
                         <p className="font-semibold text-blue-600">Cashier:</p>
-                        <p>cashier / cashier123</p>
+                        <p>Username: balaji12</p>
+                        <p>Password: Balaji@25</p>
                       </div>
                     </div>
                   </div>
