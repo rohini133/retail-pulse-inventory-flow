@@ -8,8 +8,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     // Create a new document with jsPDF
     const doc = new jsPDF();
     
-    // Add autoTable plugin to jsPDF
-    (doc as any).autoTable = autoTable;
+    // The autoTable plugin should be directly available on the doc instance
     
     const pageWidth = doc.internal.pageSize.getWidth();
     
@@ -66,7 +65,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     ]);
     
     // Use autoTable plugin
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 100,
       head: [tableColumn],
       body: tableRows,
@@ -102,7 +101,6 @@ export const generatePDF = (bill: BillWithItems): Blob => {
 export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob => {
   try {
     const doc = new jsPDF();
-    (doc as any).autoTable = autoTable;
     const pageWidth = doc.internal.pageSize.getWidth();
     
     // Add report header
@@ -152,7 +150,7 @@ export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob
       `₹ ${item.sales.toLocaleString('en-IN')}`
     ]);
     
-    (doc as any).autoTable({
+    autoTable(doc, {
       startY: 55,
       head: [salesTableColumns],
       body: salesTableRows,
@@ -174,7 +172,7 @@ export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob
         `${item.value}%`
       ]);
       
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: firstTableEndY + 10,
         head: [categoryColumns],
         body: categoryRows,
@@ -197,7 +195,7 @@ export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob
         item.soldCount.toString()
       ]);
       
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: categoryEndY + 10,
         head: [productsColumns],
         body: productRows,
@@ -221,7 +219,7 @@ export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob
         `₹ ${bill.total.toLocaleString('en-IN')}`
       ]);
       
-      (doc as any).autoTable({
+      autoTable(doc, {
         startY: previousEndY + 10,
         head: [transactionColumns],
         body: transactionRows,
@@ -319,8 +317,7 @@ export const generateSalesReportExcel = (reportData: any, timeframe: string): Bl
     }
     
     // Convert to blob
-    const encodedUri = encodeURI(csvContent);
-    const blob = new Blob([encodedUri], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     return blob;
   } catch (error) {
     console.error("Sales Report Excel Generation Error:", error);

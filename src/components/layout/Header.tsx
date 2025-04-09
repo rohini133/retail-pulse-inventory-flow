@@ -1,5 +1,5 @@
 
-import { Bell, LogOut, MenuIcon, ShoppingCart, User } from "lucide-react";
+import { Bell, LogOut, MenuIcon, ShoppingCart, User, Settings } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
 import { Badge } from "@/components/ui/badge";
+import { NotificationsPanel } from "@/components/notifications/NotificationsPanel";
 
 export const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -91,9 +92,10 @@ export const Header = () => {
                 </Badge>
               )}
               
-              <Button variant="ghost" size="icon" className="mr-2">
-                <Bell className="h-5 w-5" />
-              </Button>
+              <div className="mr-2">
+                <NotificationsPanel />
+              </div>
+              
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="mr-2">
@@ -108,8 +110,18 @@ export const Header = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <User className="h-4 w-4 mr-2" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/settings" className="cursor-pointer">
+                      <Settings className="h-4 w-4 mr-2" />
+                      Settings
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="text-red-500 focus:text-red-500">
                     <LogOut className="h-4 w-4 mr-2" />
@@ -193,16 +205,18 @@ export const Header = () => {
                 </div>
               </div>
               <div className="mt-3 space-y-1">
-                <button
+                <Link
+                  to="/profile"
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Profile
-                </button>
-                <button
+                </Link>
+                <Link
+                  to="/settings"
                   className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
                 >
                   Settings
-                </button>
+                </Link>
                 <button
                   onClick={logout}
                   className="block w-full text-left px-4 py-2 text-base font-medium text-red-500 hover:text-red-700 hover:bg-gray-100"
