@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +27,8 @@ import {
   ClipboardList, 
   DatabaseZap, 
   Download,
+  FileSpreadsheet,
+  FileText,
   Percent, 
   Plus, 
   Printer,
@@ -35,6 +36,8 @@ import {
   ShoppingBag 
 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { generateSalesReportPDF, generateSalesReportExcel } from "@/utils/pdfGenerator";
+import { sampleDashboardStats } from "@/data/sampleData";
 
 export function AdminPanel() {
   const { userRole, isLoggedIn } = useAuth();
@@ -43,8 +46,8 @@ export function AdminPanel() {
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false);
+  const [isExportingReport, setIsExportingReport] = useState(false);
   
-  // Redirect non-admin users
   if (!isLoggedIn || userRole !== "admin") {
     return <Navigate to="/login" />;
   }
@@ -57,20 +60,56 @@ export function AdminPanel() {
     });
   };
 
-  const handleExportData = (type: string) => {
+  const handleExportData = (type: string, format: 'pdf' | 'excel') => {
+    setIsExportingReport(true);
+    
     toast({
       title: "Exporting Data",
-      description: `Your ${type} data is being prepared for export.`,
+      description: `Your ${type} data is being prepared for export as ${format.toUpperCase()}.`,
     });
     
-    // In a real implementation, we'd generate a CSV/PDF file here
-    setTimeout(() => {
+    try {
+      const reportData = generateSampleSalesData();
+      
+      const currentDate = new Date().toISOString().split('T')[0];
+      let blob;
+      let fileName;
+      
+      if (format === 'pdf') {
+        blob = generateSalesReportPDF(reportData, 'monthly');
+        fileName = `${type}-report-${currentDate}.pdf`;
+      } else {
+        blob = generateSalesReportExcel(reportData, 'monthly');
+        fileName = `${type}-report-${currentDate}.csv`;
+      }
+      
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
       toast({
         title: "Export Complete",
-        description: `${type} data has been exported successfully.`,
+        description: `${type} data has been exported successfully as ${format.toUpperCase()}.`,
       });
       setIsExportDialogOpen(false);
-    }, 1500);
+    } catch (error) {
+      console.error("Export error:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating the report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsExportingReport(false);
+    }
   };
 
   const handleBackupData = () => {
@@ -79,7 +118,6 @@ export function AdminPanel() {
       description: "Creating local backup of your store data...",
     });
     
-    // Simulate backup process
     setTimeout(() => {
       toast({
         title: "Backup Complete",
@@ -94,7 +132,6 @@ export function AdminPanel() {
       description: "Getting your report ready for printing...",
     });
     
-    // In a real implementation, we'd open the print dialog here
     setTimeout(() => {
       window.print();
     }, 1000);
@@ -296,29 +333,57 @@ export function AdminPanel() {
           <DialogHeader>
             <DialogTitle>Export Data</DialogTitle>
             <DialogDescription>
-              Choose what data you want to export
+              Choose what data you want to export and in which format
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            <div className="font-medium mb-2">Export Inventory Data</div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 justify-center" 
+                onClick={() => handleExportData("inventory", 'pdf')}
+                disabled={isExportingReport}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                PDF
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 justify-center" 
+                onClick={() => handleExportData("inventory", 'excel')}
+                disabled={isExportingReport}
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                CSV
+              </Button>
+            </div>
+            
+            <div className="font-medium mb-2 mt-4">Export Sales Data</div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                className="flex-1 justify-center"
+                onClick={() => handleExportData("sales", 'pdf')}
+                disabled={isExportingReport}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                PDF
+              </Button>
+              <Button 
+                variant="outline" 
+                className="flex-1 justify-center"
+                onClick={() => handleExportData("sales", 'excel')}
+                disabled={isExportingReport}
+              >
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                CSV
+              </Button>
+            </div>
+            
             <Button 
               variant="outline" 
-              className="w-full justify-start" 
-              onClick={() => handleExportData("inventory")}
-            >
-              <ShoppingBag className="mr-2 h-4 w-4" />
-              Export Inventory Data
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
-              onClick={() => handleExportData("sales")}
-            >
-              <BarChart3 className="mr-2 h-4 w-4" />
-              Export Sales Data
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start"
+              className="w-full justify-start mt-4"
               onClick={() => handlePrintReport()}
             >
               <Printer className="mr-2 h-4 w-4" />
@@ -390,5 +455,62 @@ export function AdminPanel() {
     </PageContainer>
   );
 }
+
+const generateSampleSalesData = () => {
+  const dailySales = Array.from({ length: 30 }, (_, i) => ({
+    day: `Day ${i + 1}`,
+    sales: Math.floor(Math.random() * 1000) + 200,
+  }));
+
+  const weeklySales = Array.from({ length: 12 }, (_, i) => ({
+    week: `Week ${i + 1}`,
+    sales: Math.floor(Math.random() * 5000) + 1000,
+  }));
+
+  const monthlySales = [
+    { name: "Jan", sales: 4000 },
+    { name: "Feb", sales: 3000 },
+    { name: "Mar", sales: 5000 },
+    { name: "Apr", sales: 2780 },
+    { name: "May", sales: 1890 },
+    { name: "Jun", sales: 2390 },
+    { name: "Jul", sales: 3490 },
+    { name: "Aug", sales: 4000 },
+    { name: "Sep", sales: 3200 },
+    { name: "Oct", sales: 2800 },
+    { name: "Nov", sales: 4300 },
+    { name: "Dec", sales: 5100 },
+  ];
+
+  const yearlySales = [
+    { year: "2021", sales: 45000 },
+    { year: "2022", sales: 52000 },
+    { year: "2023", sales: 49000 },
+    { year: "2024", sales: 58000 },
+    { year: "2025", sales: 31000 },
+  ];
+
+  const categoryDistribution = [
+    { name: "Electronics", value: 35 },
+    { name: "Clothing", value: 25 },
+    { name: "Groceries", value: 20 },
+    { name: "Home", value: 15 },
+    { name: "Others", value: 5 },
+  ];
+
+  const topProducts = sampleDashboardStats.topSellingProducts;
+
+  const recentTransactions = sampleDashboardStats.recentSales || [];
+
+  return {
+    dailySales,
+    weeklySales,
+    monthlySales,
+    yearlySales,
+    categoryDistribution,
+    topProducts,
+    recentTransactions,
+  };
+};
 
 export default AdminPanel;
