@@ -1,4 +1,3 @@
-
 import { BillWithItems } from "@/data/models";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -8,13 +7,11 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     // Create a new document with jsPDF
     const doc = new jsPDF();
     
-    // The autoTable plugin should be directly available on the doc instance
-    
     const pageWidth = doc.internal.pageSize.getWidth();
     
     // Add business info
     doc.setFontSize(20);
-    doc.text("Demo", pageWidth / 2, 20, { align: "center" });
+    doc.text("D MART", pageWidth / 2, 20, { align: "center" });
     
     doc.setFontSize(12);
     doc.text("Retail Management System", pageWidth / 2, 28, { align: "center" });
@@ -97,7 +94,6 @@ export const generatePDF = (bill: BillWithItems): Blob => {
   }
 };
 
-// New function to generate a sales report PDF
 export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob => {
   try {
     const doc = new jsPDF();
@@ -241,7 +237,6 @@ export const generateSalesReportPDF = (reportData: any, timeframe: string): Blob
   }
 };
 
-// Function to generate sales report Excel file
 export const generateSalesReportExcel = (reportData: any, timeframe: string): Blob => {
   try {
     // This is a simple CSV generation, in a real app you'd use a proper Excel library
