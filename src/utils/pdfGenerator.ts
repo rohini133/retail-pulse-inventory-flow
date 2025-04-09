@@ -10,7 +10,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Add business info with "Demo" instead of "D MART"
+    // Add business info
     doc.setFontSize(20);
     doc.text("Demo", pageWidth / 2, 20, { align: "center" });
     
@@ -46,51 +46,59 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     };
     doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod as keyof typeof paymentMethodMap] || bill.paymentMethod}`, 14, 91);
     
-    // Add items table with more detailed columns
-    const tableColumn = ["No.", "Item", "Price", "Qty", "Discount", "Total"];
-    const tableRows = bill.items.map((item, index) => {
-      const productName = item.productName || item.product?.name || "Unknown Product";
-      const productPrice = item.productPrice || item.product?.price || 0;
-      const discount = item.discountPercentage || item.product?.discountPercentage || 0;
-      const quantity = item.quantity;
-      const discountedPrice = productPrice * (1 - discount / 100);
-      const totalPrice = discountedPrice * quantity;
+    // FIXED: Make sure the items table is always included and properly formatted
+    // Ensure we have items to display
+    if (bill.items && bill.items.length > 0) {
+      // Add items table with more detailed columns
+      const tableColumn = ["No.", "Item", "Price", "Qty", "Discount", "Total"];
+      const tableRows = bill.items.map((item, index) => {
+        const productName = item.productName || item.product?.name || "Unknown Product";
+        const productPrice = item.productPrice || item.product?.price || 0;
+        const discount = item.discountPercentage || item.product?.discountPercentage || 0;
+        const quantity = item.quantity;
+        const discountedPrice = productPrice * (1 - discount / 100);
+        const totalPrice = discountedPrice * quantity;
+        
+        return [
+          (index + 1).toString(),
+          productName,
+          `₹ ${productPrice.toFixed(2)}`,
+          quantity.toString(),
+          `${discount}%`,
+          `₹ ${totalPrice.toFixed(2)}`
+        ];
+      });
       
-      return [
-        (index + 1).toString(),
-        productName,
-        `₹ ${productPrice.toFixed(2)}`,
-        quantity.toString(),
-        `${discount}%`,
-        `₹ ${totalPrice.toFixed(2)}`
-      ];
-    });
-    
-    // Use autoTable plugin with improved styling
-    autoTable(doc, {
-      startY: 100,
-      head: [tableColumn],
-      body: tableRows,
-      theme: 'grid',
-      headStyles: { 
-        fillColor: [66, 66, 66],
-        textColor: [255, 255, 255],
-        fontStyle: 'bold'
-      },
-      margin: { top: 100 },
-      styles: { overflow: 'linebreak' },
-      columnStyles: {
-        0: { cellWidth: 10 }, // No.
-        1: { cellWidth: 60 }, // Item
-        2: { cellWidth: 25 }, // Price
-        3: { cellWidth: 15 }, // Qty
-        4: { cellWidth: 25 }, // Discount
-        5: { cellWidth: 30 }  // Total
-      }
-    });
+      // Use autoTable plugin with improved styling
+      autoTable(doc, {
+        startY: 100,
+        head: [tableColumn],
+        body: tableRows,
+        theme: 'grid',
+        headStyles: { 
+          fillColor: [66, 66, 66],
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        margin: { top: 100 },
+        styles: { overflow: 'linebreak' },
+        columnStyles: {
+          0: { cellWidth: 10 }, // No.
+          1: { cellWidth: 60 }, // Item
+          2: { cellWidth: 25 }, // Price
+          3: { cellWidth: 15 }, // Qty
+          4: { cellWidth: 25 }, // Discount
+          5: { cellWidth: 30 }  // Total
+        }
+      });
+    } else {
+      // If no items are present, display a message
+      doc.setFontSize(12);
+      doc.text("No items in this bill", pageWidth / 2, 120, { align: "center" });
+    }
     
     // Calculate the Y position after the table
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 10 : 130;
     
     // Add summary with more formatting
     doc.setFontSize(10);
