@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Bill, BillWithItems } from "@/data/models";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
@@ -160,7 +161,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
       <CardContent className="flex-grow overflow-auto">
         <div ref={receiptRef}>
           <div className="receipt-header">
-            <div className="store-name">D MART</div>
+            <div className="store-name">Demo</div>
             <div className="text-sm text-gray-600">123 Retail Avenue, Shopping District</div>
             <div className="text-sm text-gray-600">Tel: (123) 456-7890</div>
             <div className="receipt-date text-sm text-gray-600 mt-2">
@@ -246,7 +247,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
           </div>
 
           <div className="receipt-footer text-center text-xs text-gray-500 mt-5">
-            <p>Thank you for shopping at D MART!</p>
+            <p>Thank you for shopping at Demo!</p>
             <p>Visit us again soon!</p>
           </div>
         </div>

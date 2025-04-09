@@ -80,9 +80,9 @@ function createWindow() {
           label: 'About',
           click() {
             dialog.showMessageBox(mainWindow, {
-              title: 'About D MART Retail Management',
-              message: 'D MART Retail Management System',
-              detail: 'Version 1.0.0\n© 2025 D MART',
+              title: 'About Demo Retail Management',
+              message: 'Demo Retail Management System',
+              detail: 'Version 1.0.0\n© 2025 Demo',
               buttons: ['OK']
             });
           }

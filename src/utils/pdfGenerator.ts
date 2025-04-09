@@ -1,3 +1,4 @@
+
 import { BillWithItems } from "@/data/models";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -9,29 +10,24 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     
     const pageWidth = doc.internal.pageSize.getWidth();
     
-    // Add business info
+    // Add business info with "Demo" instead of "D MART"
     doc.setFontSize(20);
-    doc.text("D MART", pageWidth / 2, 20, { align: "center" });
+    doc.text("Demo", pageWidth / 2, 20, { align: "center" });
     
     doc.setFontSize(12);
     doc.text("Retail Management System", pageWidth / 2, 28, { align: "center" });
     doc.text("123 Shopping Street, Retail City", pageWidth / 2, 35, { align: "center" });
     doc.text("Contact: +91 98765 43210", pageWidth / 2, 42, { align: "center" });
     
-    // Add bill info
+    // Add bill info with more prominent bill number
     doc.setFontSize(14);
     doc.text(`Bill #${bill.id}`, 14, 55);
     
+    // Add date in a clearer format
     doc.setFontSize(10);
-    const dateOptions: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
     const date = new Date(bill.createdAt);
-    doc.text(`Date: ${date.toLocaleDateString('en-IN', dateOptions)}`, 14, 62);
+    const formattedDate = `Date: ${date.getDate()} ${date.toLocaleString('default', { month: 'long' })} ${date.getFullYear()} at ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')} ${date.getHours() >= 12 ? 'pm' : 'am'}`;
+    doc.text(formattedDate, 14, 62);
     
     // Add customer details
     doc.text(`Customer: ${bill.customerName || "Walk-in Customer"}`, 14, 70);
@@ -42,43 +38,80 @@ export const generatePDF = (bill: BillWithItems): Blob => {
       doc.text(`Email: ${bill.customerEmail}`, 14, 84);
     }
     
-    // Add payment method
+    // Add payment method with clearer labels
     const paymentMethodMap = {
       "cash": "Cash",
       "card": "Credit/Debit Card",
       "digital-wallet": "Digital Wallet"
     };
-    doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod as keyof typeof paymentMethodMap]}`, 14, 91);
+    doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod as keyof typeof paymentMethodMap] || bill.paymentMethod}`, 14, 91);
     
-    // Add items table
+    // Add items table with more detailed columns
     const tableColumn = ["No.", "Item", "Price", "Qty", "Discount", "Total"];
-    const tableRows = bill.items.map((item, index) => [
-      (index + 1).toString(),
-      item.productName || item.product?.name || "Unknown Product",
-      `₹ ${(item.productPrice || item.product?.price || 0).toFixed(2)}`,
-      item.quantity.toString(),
-      `${item.discountPercentage || item.product?.discountPercentage || 0}%`,
-      `₹ ${((item.productPrice || item.product?.price || 0) * (1 - (item.discountPercentage || item.product?.discountPercentage || 0) / 100) * item.quantity).toFixed(2)}`
-    ]);
+    const tableRows = bill.items.map((item, index) => {
+      const productName = item.productName || item.product?.name || "Unknown Product";
+      const productPrice = item.productPrice || item.product?.price || 0;
+      const discount = item.discountPercentage || item.product?.discountPercentage || 0;
+      const quantity = item.quantity;
+      const discountedPrice = productPrice * (1 - discount / 100);
+      const totalPrice = discountedPrice * quantity;
+      
+      return [
+        (index + 1).toString(),
+        productName,
+        `₹ ${productPrice.toFixed(2)}`,
+        quantity.toString(),
+        `${discount}%`,
+        `₹ ${totalPrice.toFixed(2)}`
+      ];
+    });
     
-    // Use autoTable plugin
+    // Use autoTable plugin with improved styling
     autoTable(doc, {
       startY: 100,
       head: [tableColumn],
       body: tableRows,
-      theme: 'striped',
-      headStyles: { fillColor: [66, 66, 66] },
-      margin: { top: 100 }
+      theme: 'grid',
+      headStyles: { 
+        fillColor: [66, 66, 66],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold'
+      },
+      margin: { top: 100 },
+      styles: { overflow: 'linebreak' },
+      columnStyles: {
+        0: { cellWidth: 10 }, // No.
+        1: { cellWidth: 60 }, // Item
+        2: { cellWidth: 25 }, // Price
+        3: { cellWidth: 15 }, // Qty
+        4: { cellWidth: 25 }, // Discount
+        5: { cellWidth: 30 }  // Total
+      }
     });
     
     // Calculate the Y position after the table
     const finalY = (doc as any).lastAutoTable.finalY + 10;
     
-    // Add summary
-    doc.text(`Subtotal: ₹ ${bill.subtotal.toFixed(2)}`, pageWidth - 60, finalY + 10);
-    doc.text(`Tax (18%): ₹ ${bill.tax.toFixed(2)}`, pageWidth - 60, finalY + 17);
+    // Add summary with more formatting
+    doc.setFontSize(10);
+    const subtotalText = `Subtotal:`;
+    const subtotalValue = `₹ ${bill.subtotal.toFixed(2)}`;
+    doc.text(subtotalText, pageWidth - 80, finalY + 10);
+    doc.text(subtotalValue, pageWidth - 20, finalY + 10, { align: 'right' });
+    
+    const taxText = `Tax (8%):`;
+    const taxValue = `₹ ${bill.tax.toFixed(2)}`;
+    doc.text(taxText, pageWidth - 80, finalY + 17);
+    doc.text(taxValue, pageWidth - 20, finalY + 17, { align: 'right' });
+    
+    // Grand total with bold formatting
     doc.setFontSize(12);
-    doc.text(`Grand Total: ₹ ${bill.total.toFixed(2)}`, pageWidth - 60, finalY + 27);
+    doc.setFont(undefined, 'bold');
+    const grandTotalText = `Grand Total:`;
+    const grandTotalValue = `₹ ${bill.total.toFixed(2)}`;
+    doc.text(grandTotalText, pageWidth - 80, finalY + 27);
+    doc.text(grandTotalValue, pageWidth - 20, finalY + 27, { align: 'right' });
+    doc.setFont(undefined, 'normal');
     
     // Add footer
     doc.setFontSize(8);
