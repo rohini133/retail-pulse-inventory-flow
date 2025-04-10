@@ -95,6 +95,38 @@ function createWindow() {
     }
   ];
 
+  // Special handling for MacOS
+  if (process.platform === 'darwin') {
+    // Add the App menu (macOS only)
+    template.unshift({
+      label: app.name,
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { role: 'services' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    });
+
+    // Modify the Window menu for macOS
+    template.splice(4, 0, {
+      label: 'Window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'zoom' },
+        { type: 'separator' },
+        { role: 'front' },
+        { type: 'separator' },
+        { role: 'window' }
+      ]
+    });
+  }
+
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 
@@ -171,8 +203,11 @@ function setupIpcHandlers() {
   });
 }
 
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
 app.whenReady().then(createWindow);
 
+// Quit when all windows are closed, except on macOS.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -180,6 +215,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
+  // On macOS, re-create a window when the dock icon is clicked and there are no other windows open.
   if (mainWindow === null) {
     createWindow();
   }

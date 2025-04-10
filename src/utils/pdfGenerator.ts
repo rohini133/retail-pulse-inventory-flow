@@ -1,4 +1,3 @@
-
 import { BillWithItems } from "@/data/models";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -46,8 +45,7 @@ export const generatePDF = (bill: BillWithItems): Blob => {
     };
     doc.text(`Payment Method: ${paymentMethodMap[bill.paymentMethod as keyof typeof paymentMethodMap] || bill.paymentMethod}`, 14, 91);
     
-    // FIXED: Make sure the items table is always included and properly formatted
-    // Ensure we have items to display
+    // Make sure the items table is always included and properly formatted
     if (bill.items && bill.items.length > 0) {
       // Add items table with more detailed columns
       const tableColumn = ["No.", "Item", "Price", "Qty", "Discount", "Total"];

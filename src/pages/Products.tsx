@@ -8,14 +8,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Plus, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { ProductForm } from "@/components/admin/ProductForm";
 
 const Products = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
+  const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { toast } = useToast();
   const { userRole } = useAuth();
 
@@ -66,6 +71,30 @@ const Products = () => {
     filterProducts();
   };
 
+  const handleAddProductSuccess = () => {
+    setIsAddProductDialogOpen(false);
+    fetchProducts();
+    toast({
+      title: "Product Added",
+      description: "The product has been successfully added to inventory.",
+    });
+  };
+
+  const handleEditProductSuccess = () => {
+    setIsEditProductDialogOpen(false);
+    setSelectedProduct(null);
+    fetchProducts();
+    toast({
+      title: "Product Updated",
+      description: "The product has been successfully updated.",
+    });
+  };
+
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product);
+    setIsEditProductDialogOpen(true);
+  };
+
   return (
     <PageContainer 
       title="Products" 
@@ -90,7 +119,10 @@ const Products = () => {
           <div className="flex gap-2">
             <Button onClick={handleSearch}>Search</Button>
             {userRole === "admin" && (
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button 
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => setIsAddProductDialogOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-1" /> Add Product
               </Button>
             )}
@@ -202,7 +234,13 @@ const Products = () => {
                     
                     {userRole === "admin" && (
                       <div className="mt-4 flex justify-end gap-2">
-                        <Button size="sm" variant="outline">Edit</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleEdit(product)}
+                        >
+                          Edit
+                        </Button>
                         <Button size="sm" variant="outline" className="text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600">Delete</Button>
                       </div>
                     )}
@@ -213,6 +251,44 @@ const Products = () => {
           </div>
         )}
       </div>
+
+      {/* Add Product Dialog */}
+      <Dialog 
+        open={isAddProductDialogOpen} 
+        onOpenChange={setIsAddProductDialogOpen}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+          </DialogHeader>
+          <ProductForm 
+            onSuccess={handleAddProductSuccess}
+            onCancel={() => setIsAddProductDialogOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Dialog */}
+      <Dialog 
+        open={isEditProductDialogOpen} 
+        onOpenChange={setIsEditProductDialogOpen}
+      >
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <ProductForm 
+              product={selectedProduct}
+              onSuccess={handleEditProductSuccess}
+              onCancel={() => {
+                setIsEditProductDialogOpen(false);
+                setSelectedProduct(null);
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 };

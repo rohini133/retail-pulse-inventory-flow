@@ -109,7 +109,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     setIsDownloading(true);
     
     try {
@@ -120,23 +120,42 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
       
       const pdfBlob = generatePDF(billWithItems);
       
-      const url = URL.createObjectURL(pdfBlob);
-      const fileName = `receipt-${bill.id}.pdf`;
-      const element = document.createElement("a");
-      element.href = url;
-      element.download = fileName;
-      document.body.appendChild(element);
-      element.click();
-      
-      setTimeout(() => {
-        document.body.removeChild(element);
-        URL.revokeObjectURL(url);
-      }, 100);
-      
-      toast({
-        title: "Receipt Downloaded",
-        description: `Receipt has been downloaded as ${fileName}`,
-      });
+      // Use Electron saveFile function if available, otherwise use browser download
+      if (window.saveFile) {
+        const result = await window.saveFile(
+          pdfBlob, 
+          `receipt-${bill.id}.pdf`,
+          'pdf'
+        );
+        
+        if (result.success) {
+          toast({
+            title: "Receipt Downloaded",
+            description: `Receipt has been saved to ${result.filePath}`,
+          });
+        } else {
+          throw new Error(result.error);
+        }
+      } else {
+        // Browser fallback
+        const url = URL.createObjectURL(pdfBlob);
+        const fileName = `receipt-${bill.id}.pdf`;
+        const element = document.createElement("a");
+        element.href = url;
+        element.download = fileName;
+        document.body.appendChild(element);
+        element.click();
+        
+        setTimeout(() => {
+          document.body.removeChild(element);
+          URL.revokeObjectURL(url);
+        }, 100);
+        
+        toast({
+          title: "Receipt Downloaded",
+          description: `Receipt has been downloaded as ${fileName}`,
+        });
+      }
     } catch (error) {
       console.error("Download error:", error);
       toast({
@@ -148,6 +167,11 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
       setIsDownloading(false);
     }
   };
+
+  // Verify we have items array
+  if (!bill.items || bill.items.length === 0) {
+    console.warn("No items found in bill:", bill.id);
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -189,7 +213,7 @@ export const BillReceipt = ({ bill }: BillReceiptProps) => {
               </tr>
             </thead>
             <tbody>
-              {bill.items.map((item, index) => {
+              {bill.items && bill.items.map((item, index) => {
                 const discountedPrice = item.product.price * (1 - item.product.discountPercentage / 100);
                 const itemTotal = discountedPrice * item.quantity;
                 
