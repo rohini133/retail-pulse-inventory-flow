@@ -1,9 +1,8 @@
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Product } from "@/data/models";
-import { getProductStockStatus, getProducts } from "@/services/productService";
+import { getProductStockStatus } from "@/services/productService";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,12 +11,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Loader2, Plus, Search } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { ProductForm } from "@/components/admin/ProductForm";
+import { useProductsSync } from "@/hooks/useProductsSync";
 
 const Products = () => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const { products: syncedProducts, isLoading: isSyncLoading, error: syncError } = useProductsSync();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
   const [isAddProductDialogOpen, setIsAddProductDialogOpen] = useState(false);
   const [isEditProductDialogOpen, setIsEditProductDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -25,38 +24,17 @@ const Products = () => {
   const { userRole } = useAuth();
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  useEffect(() => {
     filterProducts();
-  }, [products, searchTerm]);
-
-  const fetchProducts = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getProducts();
-      setProducts(data);
-      setFilteredProducts(data);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to load products. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [syncedProducts, searchTerm]);
 
   const filterProducts = () => {
     if (searchTerm.trim() === "") {
-      setFilteredProducts([...products]);
+      setFilteredProducts([...syncedProducts]);
       return;
     }
 
     const search = searchTerm.toLowerCase();
-    const filtered = products.filter(
+    const filtered = syncedProducts.filter(
       (product) =>
         product.name.toLowerCase().includes(search) ||
         product.brand.toLowerCase().includes(search) ||
@@ -73,7 +51,6 @@ const Products = () => {
 
   const handleAddProductSuccess = () => {
     setIsAddProductDialogOpen(false);
-    fetchProducts();
     toast({
       title: "Product Added",
       description: "The product has been successfully added to inventory.",
@@ -83,7 +60,6 @@ const Products = () => {
   const handleEditProductSuccess = () => {
     setIsEditProductDialogOpen(false);
     setSelectedProduct(null);
-    fetchProducts();
     toast({
       title: "Product Updated",
       description: "The product has been successfully updated.",
@@ -94,6 +70,16 @@ const Products = () => {
     setSelectedProduct(product);
     setIsEditProductDialogOpen(true);
   };
+
+  useEffect(() => {
+    if (syncError) {
+      toast({
+        title: "Synchronization Error",
+        description: syncError,
+        variant: "destructive",
+      });
+    }
+  }, [syncError, toast]);
 
   return (
     <PageContainer 
@@ -129,7 +115,7 @@ const Products = () => {
           </div>
         </div>
 
-        {isLoading ? (
+        {isSyncLoading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>

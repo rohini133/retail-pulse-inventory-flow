@@ -1,80 +1,126 @@
-
 import { useState } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
-import { useBillingCart } from "@/hooks/useBillingCart";
-import { ItemScanner } from "@/components/billing/ItemScanner";
 import { ProductSearch } from "@/components/billing/ProductSearch";
 import { ShoppingCart } from "@/components/billing/ShoppingCart";
+import { useBillingCart } from "@/hooks/useBillingCart";
+import { useNavigate } from 'react-router-dom';
+import { Product } from "@/types/supabase-extensions";
 import { CheckoutDialog } from "@/components/billing/CheckoutDialog";
-
-interface CustomerInfo {
-  name: string;
-  phone: string;
-  email: string;
-  paymentMethod: "cash" | "card" | "digital-wallet";
-}
+import { CustomerInfo } from "@/types/supabase-extensions";
+import { useToast } from "@/components/ui/use-toast";
+import { createBill } from "@/services/billService";
+import { BillWithItems } from "@/data/models";
 
 const Billing = () => {
+  const [showSearch, setShowSearch] = useState(true);
   const { 
     cartItems, 
     addToCart, 
     updateQuantity, 
     removeItem, 
-    clearCart,
-    calculateSubtotal,
-    calculateTax,
-    calculateTotal
+    clearCart, 
+    calculateSubtotal, 
+    calculateTotal, 
+    updateStock 
   } = useBillingCart();
-  
-  const [isCheckoutDialogOpen, setIsCheckoutDialogOpen] = useState(false);
-  const [createdBillId, setCreatedBillId] = useState<string | null>(null);
-  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-    name: "",
-    phone: "",
-    email: "",
-    paymentMethod: "cash"
-  });
+  const navigate = useNavigate();
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({});
+  const [paymentMethod, setPaymentMethod] = useState<string>("cash");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentBill, setCurrentBill] = useState<BillWithItems | null>(null);
+  const [discount, setDiscount] = useState<{ value: number, type: "percent" | "amount" }>({ value: 0, type: "percent" });
+  const { toast } = useToast();
 
-  const handleCheckoutComplete = (billId: string, customerInfo: CustomerInfo) => {
-    setCreatedBillId(billId);
-    setCustomerInfo(customerInfo);
-    setIsCheckoutDialogOpen(true);
+  const handleItemSelect = (product: Product) => {
+    if (product.stock > 0) {
+      addToCart(product);
+    } else {
+      toast({
+        title: "Out of stock",
+        description: `${product.name} is currently out of stock.`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCheckout = async (customerData: CustomerInfo, paymentMethod: string, discountArg: { value: number, type: "percent" | "amount" }) => {
+    if (cartItems.length === 0) {
+      toast({
+        title: "Empty cart",
+        description: "Please add items to the cart before proceeding to checkout.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      let subtotal = calculateSubtotal();
+      let discountAmount = 0;
+      if (discountArg.type === "percent") discountAmount = subtotal * (discountArg.value / 100);
+      else discountAmount = discountArg.value;
+      if (discountAmount < 0) discountAmount = 0;
+      if (discountAmount > subtotal) discountAmount = subtotal;
+      const total = subtotal - discountAmount;
+
+      const billWithItems = await createBill({
+        cartItems,
+        subtotal,
+        tax: 0,
+        discountAmount,
+        discountType: discountArg.type,
+        discountValue: discountArg.value,
+        total,
+        customerName: customerData.name,
+        customerPhone: customerData.phone,
+        customerEmail: customerData.email,
+        paymentMethod,
+        status: 'completed'
+      });
+
+      console.log("Created bill with items:", billWithItems);
+
+      for (const item of cartItems) {
+        await updateStock(item);
+      }
+
+      setCurrentBill(billWithItems);
+      setIsCheckoutOpen(true);
+      clearCart();
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout failed",
+        description: "There was an error processing your bill. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <PageContainer title="Billing" subtitle="Create bills and process sales">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <ItemScanner onItemScanned={addToCart} />
-          <ProductSearch onAddToCart={addToCart} />
+    <PageContainer title="Billing" subtitle="Create new bills and process payments">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-5">
+          <ProductSearch onAddToCart={handleItemSelect} />
         </div>
-
-        <div>
-          <ShoppingCart 
+        <div className="lg:col-span-7">
+          <ShoppingCart
             cartItems={cartItems}
             onUpdateCartItem={updateQuantity}
             onRemoveCartItem={removeItem}
-            onCheckoutComplete={handleCheckoutComplete}
+            onCheckoutComplete={handleCheckout}
             onCartClear={clearCart}
-            subtotal={calculateSubtotal()}
-            tax={calculateTax()}
             total={calculateTotal()}
+            isSubmitting={isSubmitting}
           />
         </div>
       </div>
-
       <CheckoutDialog 
-        open={isCheckoutDialogOpen}
-        onOpenChange={setIsCheckoutDialogOpen}
-        billId={createdBillId}
-        customerPhone={customerInfo.phone}
-        cartItems={cartItems}
-        customerName={customerInfo.name}
-        customerEmail={customerInfo.email}
-        paymentMethod={customerInfo.paymentMethod}
-        subtotal={calculateSubtotal()}
-        tax={calculateTax()}
-        total={calculateTotal()}
+        open={isCheckoutOpen}
+        onOpenChange={setIsCheckoutOpen}
+        bill={currentBill}
       />
     </PageContainer>
   );

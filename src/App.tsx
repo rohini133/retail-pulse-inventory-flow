@@ -1,115 +1,90 @@
 
+import React, { useEffect } from 'react';
+import { Route, Routes, useLocation } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { Header } from './components/layout/Header';
+import { Footer } from './components/layout/Footer';
+import Dashboard from './pages/Dashboard';
+import Inventory from './pages/Inventory';
+import Billing from './pages/Billing';
+import { AdminPanel } from './pages/AdminPanel';
+import Login from './pages/Login';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Billing from "./pages/Billing";
-import BillHistory from "./pages/BillHistory";
-import Inventory from "./pages/Inventory";
-import Products from "./pages/Products";
-import AdminPanel from "./pages/AdminPanel";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Profile from "./pages/Profile";
-import Settings from "./pages/Settings";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import Index from "./pages/Index";
+import BillHistory from './pages/BillHistory';
 
-const queryClient = new QueryClient();
+// ScrollToTop component that scrolls to top on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
+// Update the routes to remove Products page (since it duplicates Inventory)
+// and add BillHistory page
+const routes = [
+  {
+    path: "/",
+    element: <Dashboard />,
+  },
+  {
+    path: "/inventory",
+    element: <Inventory />,
+  },
+  {
+    path: "/billing",
+    element: <Billing />,
+  },
+  {
+    path: "/billhistory",
+    element: <BillHistory />,
+  },
+  {
+    path: "/admin",
+    element: <AdminPanel />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/settings",
+    element: <Settings />,
+  },
+  {
+    path: "/*",
+    element: <NotFound />,
+  },
+];
+
+function App() {
+  return (
+    <AuthProvider>
+      <ScrollToTop />
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Index />} />
-            
-            {/* Protected routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/billing" 
-              element={
-                <ProtectedRoute>
-                  <Billing />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/bill-history" 
-              element={
-                <ProtectedRoute>
-                  <BillHistory />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/inventory" 
-              element={
-                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
-                  <Inventory />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/products" 
-              element={
-                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
-                  <Products />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/admin" 
-              element={
-                <ProtectedRoute requiredRole="admin" restrictedRoles={["cashier"]}>
-                  <AdminPanel />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route 
-              path="/settings" 
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              } 
-            />
-            
-            <Route path="*" element={<NotFound />} />
+            {routes.map((route, index) => (
+              <Route key={index} path={route.path} element={route.element} />
+            ))}
           </Routes>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        </main>
+        <Footer />
+      </div>
+      <Toaster />
+    </AuthProvider>
+  );
+}
 
 export default App;

@@ -1,7 +1,13 @@
 
 import { useState } from "react";
-import { CartItem, Product } from "@/data/models";
 import { useToast } from "@/components/ui/use-toast";
+import { Product } from "@/types/supabase-extensions";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
 
 export function useBillingCart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -92,12 +98,34 @@ export function useBillingCart() {
     }, 0);
   };
 
-  const calculateTax = () => {
-    return calculateSubtotal() * 0.08; // 8% tax
-  };
-
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTax();
+    return calculateSubtotal();
+  };
+  
+  // Update stock in the database
+  const updateStock = async (item: CartItem) => {
+    try {
+      console.log(`Updating stock for product ${item.product.id}, quantity ${item.quantity}`);
+      
+      // Update the products table directly
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          stock: item.product.stock - item.quantity,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', item.product.id);
+      
+      if (error) {
+        console.error("Error updating stock:", error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error("Error in updateStock:", error);
+      return false;
+    }
   };
 
   return {
@@ -107,7 +135,7 @@ export function useBillingCart() {
     removeItem,
     clearCart,
     calculateSubtotal,
-    calculateTax,
-    calculateTotal
+    calculateTotal,
+    updateStock
   };
 }

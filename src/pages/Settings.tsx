@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,28 +10,38 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { Settings as SettingsIcon, Database, Globe, Printer, CreditCard, Lock } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const Settings = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("general");
+  const { darkMode, setDarkMode } = useTheme();
   
   // General settings
   const [generalSettings, setGeneralSettings] = useState({
-    storeName: "Demo Store",
-    storeAddress: "123 Shopping Street, Retail City",
-    storePhone: "+91 98765 43210",
-    storeEmail: "info@demostore.com",
+    storeName: "Vivaas",
+    storeAddress: "Shiv Park Phase 2 Shop No-6-7 Pune Solapur Road Lakshumi Colony Opposite HDFC Bank Near Angle School Pune -412307",
+    storePhone: "+91 96571 71777",
+    storeEmail: "info@vivaas.com",
     currency: "INR",
     language: "en",
     timeZone: "Asia/Kolkata",
     darkMode: false
   });
+
+  // Update local state when theme context changes
+  useEffect(() => {
+    setGeneralSettings(prev => ({
+      ...prev,
+      darkMode
+    }));
+  }, [darkMode]);
   
   // Receipt settings
   const [receiptSettings, setReceiptSettings] = useState({
-    showLogo: true,
+    showLogo: false,
     showStoreInfo: true,
-    showTaxInfo: true,
+    showTaxInfo: false,
     footerText: "Thank you for shopping with us!",
     printAutomatically: false,
     sendReceiptEmail: true,
@@ -60,6 +70,10 @@ const Settings = () => {
   
   const handleGeneralSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Update the dark mode in the theme context
+    setDarkMode(generalSettings.darkMode);
+    
     toast({
       title: "Settings Saved",
       description: "General settings have been updated successfully.",
@@ -89,17 +103,22 @@ const Settings = () => {
       description: "System settings have been updated successfully.",
     });
   };
+
+  const handleDarkModeToggle = (checked: boolean) => {
+    setGeneralSettings({...generalSettings, darkMode: checked});
+    setDarkMode(checked);
+  };
   
   return (
     <PageContainer title="Settings" subtitle="Configure system preferences and options">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-1">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="pt-6">
               <div className="space-y-2">
                 <Button 
                   variant={activeTab === "general" ? "default" : "outline"} 
-                  className="w-full justify-start" 
+                  className="w-full justify-start dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
                   onClick={() => setActiveTab("general")}
                 >
                   <SettingsIcon className="mr-2 h-4 w-4" />
@@ -108,7 +127,7 @@ const Settings = () => {
                 
                 <Button 
                   variant={activeTab === "receipt" ? "default" : "outline"} 
-                  className="w-full justify-start" 
+                  className="w-full justify-start dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
                   onClick={() => setActiveTab("receipt")}
                 >
                   <Printer className="mr-2 h-4 w-4" />
@@ -117,7 +136,7 @@ const Settings = () => {
                 
                 <Button 
                   variant={activeTab === "payment" ? "default" : "outline"} 
-                  className="w-full justify-start" 
+                  className="w-full justify-start dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
                   onClick={() => setActiveTab("payment")}
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
@@ -126,7 +145,7 @@ const Settings = () => {
                 
                 <Button 
                   variant={activeTab === "system" ? "default" : "outline"} 
-                  className="w-full justify-start" 
+                  className="w-full justify-start dark:border-gray-600 dark:text-white dark:hover:bg-gray-700" 
                   onClick={() => setActiveTab("system")}
                 >
                   <Database className="mr-2 h-4 w-4" />
@@ -147,52 +166,55 @@ const Settings = () => {
             </TabsList>
             
             <TabsContent value="general">
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>General Settings</CardTitle>
-                  <CardDescription>Configure basic store information and preferences</CardDescription>
+                  <CardTitle className="dark:text-white">General Settings</CardTitle>
+                  <CardDescription className="dark:text-gray-300">Configure basic store information and preferences</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleGeneralSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="storeName">Store Name</Label>
+                        <Label htmlFor="storeName" className="dark:text-white">Store Name</Label>
                         <Input 
                           id="storeName"
                           value={generalSettings.storeName}
                           onChange={(e) => setGeneralSettings({...generalSettings, storeName: e.target.value})}
+                          className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="storeEmail">Store Email</Label>
+                        <Label htmlFor="storeEmail" className="dark:text-white">Store Email</Label>
                         <Input 
                           id="storeEmail"
                           type="email"
                           value={generalSettings.storeEmail}
                           onChange={(e) => setGeneralSettings({...generalSettings, storeEmail: e.target.value})}
+                          className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="storePhone">Store Phone</Label>
+                        <Label htmlFor="storePhone" className="dark:text-white">Store Phone</Label>
                         <Input 
                           id="storePhone"
                           value={generalSettings.storePhone}
                           onChange={(e) => setGeneralSettings({...generalSettings, storePhone: e.target.value})}
+                          className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="currency">Currency</Label>
+                        <Label htmlFor="currency" className="dark:text-white">Currency</Label>
                         <Select 
                           value={generalSettings.currency}
                           onValueChange={(value) => setGeneralSettings({...generalSettings, currency: value})}
                         >
-                          <SelectTrigger id="currency">
+                          <SelectTrigger id="currency" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <SelectValue placeholder="Select currency" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                             <SelectItem value="INR">Indian Rupee (₹)</SelectItem>
                             <SelectItem value="USD">US Dollar ($)</SelectItem>
                             <SelectItem value="EUR">Euro (€)</SelectItem>
@@ -203,25 +225,26 @@ const Settings = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="storeAddress">Store Address</Label>
+                      <Label htmlFor="storeAddress" className="dark:text-white">Store Address</Label>
                       <Input 
                         id="storeAddress"
                         value={generalSettings.storeAddress}
                         onChange={(e) => setGeneralSettings({...generalSettings, storeAddress: e.target.value})}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="language">Language</Label>
+                        <Label htmlFor="language" className="dark:text-white">Language</Label>
                         <Select 
                           value={generalSettings.language}
                           onValueChange={(value) => setGeneralSettings({...generalSettings, language: value})}
                         >
-                          <SelectTrigger id="language">
+                          <SelectTrigger id="language" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <SelectValue placeholder="Select language" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                             <SelectItem value="en">English</SelectItem>
                             <SelectItem value="hi">Hindi</SelectItem>
                             <SelectItem value="mr">Marathi</SelectItem>
@@ -231,15 +254,15 @@ const Settings = () => {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="timeZone">Time Zone</Label>
+                        <Label htmlFor="timeZone" className="dark:text-white">Time Zone</Label>
                         <Select 
                           value={generalSettings.timeZone}
                           onValueChange={(value) => setGeneralSettings({...generalSettings, timeZone: value})}
                         >
-                          <SelectTrigger id="timeZone">
+                          <SelectTrigger id="timeZone" className="dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                             <SelectValue placeholder="Select time zone" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="dark:bg-gray-800 dark:border-gray-700">
                             <SelectItem value="Asia/Kolkata">India (GMT+5:30)</SelectItem>
                             <SelectItem value="America/New_York">Eastern Time (GMT-4)</SelectItem>
                             <SelectItem value="Europe/London">UK (GMT+1)</SelectItem>
@@ -253,9 +276,9 @@ const Settings = () => {
                       <Switch 
                         id="darkMode"
                         checked={generalSettings.darkMode}
-                        onCheckedChange={(checked) => setGeneralSettings({...generalSettings, darkMode: checked})}
+                        onCheckedChange={handleDarkModeToggle}
                       />
-                      <Label htmlFor="darkMode">Enable Dark Mode</Label>
+                      <Label htmlFor="darkMode" className="dark:text-white">Enable Dark Mode</Label>
                     </div>
                     
                     <Button type="submit" className="mt-4">Save Changes</Button>
@@ -265,16 +288,16 @@ const Settings = () => {
             </TabsContent>
             
             <TabsContent value="receipt">
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Receipt Settings</CardTitle>
-                  <CardDescription>Configure how receipts are generated and delivered</CardDescription>
+                  <CardTitle className="dark:text-white">Receipt Settings</CardTitle>
+                  <CardDescription className="dark:text-gray-300">Configure how receipts are generated and delivered</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleReceiptSubmit} className="space-y-4">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="showLogo">Show Store Logo</Label>
+                        <Label htmlFor="showLogo" className="dark:text-white">Show Store Logo</Label>
                         <Switch 
                           id="showLogo"
                           checked={receiptSettings.showLogo}
@@ -283,7 +306,7 @@ const Settings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="showStoreInfo">Show Store Information</Label>
+                        <Label htmlFor="showStoreInfo" className="dark:text-white">Show Store Information</Label>
                         <Switch 
                           id="showStoreInfo"
                           checked={receiptSettings.showStoreInfo}
@@ -292,7 +315,7 @@ const Settings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="showTaxInfo">Show Tax Information</Label>
+                        <Label htmlFor="showTaxInfo" className="dark:text-white">Show Tax Information</Label>
                         <Switch 
                           id="showTaxInfo"
                           checked={receiptSettings.showTaxInfo}
@@ -301,7 +324,7 @@ const Settings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="printAutomatically">Print Automatically</Label>
+                        <Label htmlFor="printAutomatically" className="dark:text-white">Print Automatically</Label>
                         <Switch 
                           id="printAutomatically"
                           checked={receiptSettings.printAutomatically}
@@ -310,7 +333,7 @@ const Settings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="sendReceiptEmail">Email Receipt</Label>
+                        <Label htmlFor="sendReceiptEmail" className="dark:text-white">Email Receipt</Label>
                         <Switch 
                           id="sendReceiptEmail"
                           checked={receiptSettings.sendReceiptEmail}
@@ -319,7 +342,7 @@ const Settings = () => {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <Label htmlFor="sendReceiptSMS">SMS Receipt</Label>
+                        <Label htmlFor="sendReceiptSMS" className="dark:text-white">SMS Receipt</Label>
                         <Switch 
                           id="sendReceiptSMS"
                           checked={receiptSettings.sendReceiptSMS}
@@ -329,11 +352,12 @@ const Settings = () => {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="footerText">Receipt Footer Text</Label>
+                      <Label htmlFor="footerText" className="dark:text-white">Receipt Footer Text</Label>
                       <Input 
                         id="footerText"
                         value={receiptSettings.footerText}
                         onChange={(e) => setReceiptSettings({...receiptSettings, footerText: e.target.value})}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       />
                     </div>
                     

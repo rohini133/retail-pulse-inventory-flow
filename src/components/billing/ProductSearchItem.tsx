@@ -1,8 +1,9 @@
 
-import { Product } from "@/data/models";
-import { getProductStockStatus } from "@/services/productService";
+import { Product } from "@/types/supabase-extensions";
+import { getProductStockStatus } from "@/services/product/productHelpers";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SizeSelector } from "@/components/billing/SizeSelector";
 
 interface ProductSearchItemProps {
   product: Product;
@@ -11,6 +12,7 @@ interface ProductSearchItemProps {
 
 export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemProps) => {
   const stockStatus = getProductStockStatus(product);
+  
   const formattedPrice = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -57,34 +59,25 @@ export const ProductSearchItem = ({ product, onAddToCart }: ProductSearchItemPro
               <span className="font-medium text-gray-900">{formattedPrice}</span>
             )}
           </div>
+          <div className="flex gap-2 mt-1">
+            {stockStatus === "in-stock" && (
+              <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                In Stock ({product.stock})
+              </Badge>
+            )}
+            {stockStatus === "low-stock" && (
+              <Badge variant="outline" className="text-xs bg-yellow-50 text-yellow-700 border-yellow-200">
+                Low Stock ({product.stock})
+              </Badge>
+            )}
+          </div>
         </div>
       </div>
-      <div className="flex flex-col items-end">
-        <div className="mb-2">
-          {stockStatus === "in-stock" && (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-              In Stock ({product.stock})
-            </Badge>
-          )}
-          {stockStatus === "low-stock" && (
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-              Low Stock ({product.stock})
-            </Badge>
-          )}
-          {stockStatus === "out-of-stock" && (
-            <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-              Out of Stock
-            </Badge>
-          )}
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={stockStatus === "out-of-stock"}
-          onClick={() => onAddToCart(product)}
-        >
-          Add to Cart
-        </Button>
+      <div>
+        <SizeSelector 
+          product={product}
+          onSizeSelect={onAddToCart}
+        />
       </div>
     </div>
   );

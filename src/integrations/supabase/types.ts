@@ -102,6 +102,7 @@ export type Database = {
       products: {
         Row: {
           brand: string
+          buying_price: number
           category: string
           color: string | null
           created_at: string
@@ -119,6 +120,7 @@ export type Database = {
         }
         Insert: {
           brand: string
+          buying_price?: number
           category: string
           color?: string | null
           created_at?: string
@@ -136,6 +138,7 @@ export type Database = {
         }
         Update: {
           brand?: string
+          buying_price?: number
           category?: string
           color?: string | null
           created_at?: string

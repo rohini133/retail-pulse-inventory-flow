@@ -1,6 +1,6 @@
 
-import { useState, useRef, ChangeEvent } from "react";
-import { Product } from "@/data/models";
+import { useState, useRef, ChangeEvent, useEffect } from "react";
+import { Product } from "@/types/supabase-extensions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,32 +13,28 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { addProduct, updateProduct } from "@/services/productService";
-import { Loader2, Upload, Image as ImageIcon } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
+import { checkActiveSession, debugAuthStatus } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 
 const productSchema = z.object({
   name: z.string().min(3, "Product name must be at least 3 characters"),
   brand: z.string().min(2, "Brand name must be at least 2 characters"),
   category: z.string().min(2, "Category must be at least 2 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
+  description: z.string().optional(),
   price: z.coerce.number().positive("Price must be positive"),
+  buyingPrice: z.coerce.number().positive("Buying price must be positive"),
   discountPercentage: z.coerce.number().min(0).max(100, "Discount must be between 0 and 100"),
   stock: z.coerce.number().int().positive("Stock must be a positive integer"),
   lowStockThreshold: z.coerce.number().int().positive("Threshold must be a positive integer"),
   image: z.string().url("Must be a valid URL"),
-  size: z.string().optional(),
   color: z.string().optional(),
+  size: z.string().optional(),
   itemNumber: z.string().min(3, "Item number must be at least 3 characters"),
 });
 
@@ -56,6 +52,26 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const isEditing = !!product;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      console.log("Checking authentication status in ProductForm...");
+      const authStatus = await debugAuthStatus();
+      console.log("ProductForm auth check result:", authStatus);
+      setIsAuthenticated(authStatus.isAuthenticated);
+      
+      if (!authStatus.isAuthenticated) {
+        toast({
+          title: "Authentication Required",
+          description: "You need to be logged in to add or edit products.",
+          variant: "destructive",
+        });
+      }
+    };
+    
+    checkAuth();
+  }, [toast]);
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -66,12 +82,13 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           category: product.category,
           description: product.description,
           price: product.price,
+          buyingPrice: product.buyingPrice || 0,
           discountPercentage: product.discountPercentage,
           stock: product.stock,
           lowStockThreshold: product.lowStockThreshold,
           image: product.image,
-          size: product.size || "",
           color: product.color || "",
+          size: product.size || "",
           itemNumber: product.itemNumber,
         }
       : {
@@ -80,55 +97,87 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           category: "",
           description: "",
           price: 0,
+          buyingPrice: 0,
           discountPercentage: 0,
           stock: 0,
           lowStockThreshold: 5,
           image: "https://placehold.co/400x300?text=Product+Image",
-          size: "",
           color: "",
+          size: "",
           itemNumber: `ITM${Math.floor(Math.random() * 10000)}`,
         }
   });
 
   const handleSubmit = async (values: ProductFormValues) => {
+    console.log("Submitting product form with size:", values.size);
+    
+    const isActive = await checkActiveSession();
+    if (!isActive) {
+      console.error("Authentication required to submit product form");
+      toast({
+        title: "Authentication Required",
+        description: "You need to be logged in to add or edit products.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
+      console.log(`Submitting ${isEditing ? 'update' : 'new'} product to Supabase:`, values);
+      
       if (isEditing && product) {
+        console.log("Updating product in Supabase:", {
+          id: product.id,
+          ...values
+        });
+        
         await updateProduct({
           ...product,
           ...values,
+          size: values.size.trim() || null,
           updatedAt: new Date().toISOString()
         });
+        
         toast({
           title: "Product updated",
           description: `${values.name} has been updated successfully.`,
         });
       } else {
-        // Fix: Ensure all required fields are explicitly provided
+        console.log("Adding new product to Supabase:", values);
+        
         await addProduct({
           name: values.name,
           brand: values.brand,
           category: values.category,
           description: values.description,
           price: values.price,
+          buyingPrice: values.buyingPrice,
           discountPercentage: values.discountPercentage,
           stock: values.stock,
           lowStockThreshold: values.lowStockThreshold,
           image: values.image,
-          size: values.size,
           color: values.color,
+          size: values.size.trim() || null,
           itemNumber: values.itemNumber,
+          // Add required properties that were missing
+          quantity: values.stock, // Use stock as the initial quantity
+          userId: "system", // Default value for new products
+          imageUrl: values.image, // Use the same URL for both image and imageUrl
         });
+        
         toast({
           title: "Product added",
           description: `${values.name} has been added successfully.`,
         });
       }
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
+      console.error(`Error ${isEditing ? 'updating' : 'adding'} product:`, error);
+      
       toast({
         title: isEditing ? "Update failed" : "Add failed",
-        description: `Failed to ${isEditing ? 'update' : 'add'} product. Please try again.`,
+        description: error.message || `Failed to ${isEditing ? 'update' : 'add'} product. Please try again.`,
         variant: "destructive",
       });
     } finally {
@@ -140,7 +189,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast({
         title: "File too large",
@@ -150,7 +198,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       return;
     }
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       toast({
         title: "Invalid file type",
@@ -160,7 +207,6 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       return;
     }
 
-    // Convert to base64 for preview and storage
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
@@ -174,9 +220,25 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     fileInputRef.current?.click();
   };
 
+  const renderAuthWarning = () => {
+    if (isAuthenticated === false) {
+      return (
+        <div className="">
+          {/*  <div className="bg-amber-50 border border-amber-200 p-3 rounded-md mb-4">
+          <p className="text-amber-800 font-medium">Authentication Required</p>
+          <p className="text-amber-700 text-sm">You are not currently authenticated with the database. 
+          Changes may not be saved. Please log out and log back in to reauthenticate.</p> */}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {renderAuthWarning()}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -272,13 +334,16 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           
           <FormField
             control={form.control}
-            name="discountPercentage"
+            name="buyingPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Discount (%)</FormLabel>
+                <FormLabel>Buying Price (₹)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" max="100" {...field} />
+                  <Input type="number" step="0.01" min="0" {...field} />
                 </FormControl>
+                <FormDescription>
+                  The price at which the product was purchased
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -286,12 +351,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           
           <FormField
             control={form.control}
-            name="stock"
+            name="discountPercentage"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock Quantity</FormLabel>
+                <FormLabel>Discount (%)</FormLabel>
                 <FormControl>
-                  <Input type="number" min="0" {...field} />
+                  <Input type="number" min="0" max="100" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -319,12 +384,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           
           <FormField
             control={form.control}
-            name="size"
+            name="stock"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Size (Optional)</FormLabel>
+                <FormLabel>Total Stock</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. S, M, L, XL" {...field} />
+                  <Input type="number" min="0" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -340,6 +405,25 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 <FormControl>
                   <Input placeholder="e.g. Red, Blue, Green" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+          <FormField
+            control={form.control}
+            name="size"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Size (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g. S, M, L, XL, 42, 10UK" {...field} />
+                </FormControl>
+                <FormDescription>
+                  For clothing and footwear, specify the available size
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}

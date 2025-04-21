@@ -1,5 +1,4 @@
-
-import { Product } from "@/data/models";
+import { Product } from "@/types/supabase-extensions";
 import { getProductStockStatus } from "@/services/productService";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,19 +81,25 @@ export const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => 
           <div className="text-right">{product.itemNumber}</div>
           
           <div className="text-gray-500">Stock</div>
-          <div className="text-right">{product.stock} units</div>
-          
-          {product.size && (
-            <>
-              <div className="text-gray-500">Size</div>
-              <div className="text-right">{product.size}</div>
-            </>
-          )}
+          <div className="text-right">
+            {product.stock} units
+          </div>
           
           {product.color && (
             <>
               <div className="text-gray-500">Color</div>
               <div className="text-right">{product.color}</div>
+            </>
+          )}
+          
+          {product.size && (
+            <>
+              <div className="text-gray-500">Size</div>
+              <div className="text-right">
+                <Badge variant="outline" className="text-xs">
+                  {product.size}
+                </Badge>
+              </div>
             </>
           )}
         </div>
